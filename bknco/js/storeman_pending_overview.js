@@ -24,16 +24,16 @@ let pendingChangesData = {};
 
 window.addEventListener('DOMContentLoaded', () => {
     // Check authentication
-    const baNumber = sessionStorage.getItem('baNumber');
+    const userid = sessionStorage.getItem('userid');
     const role_type = sessionStorage.getItem('role_type');
     
-    if (!role_type || !baNumber) {
+    if (!role_type || !userid) {
         alert('Session expired. Please log in again.');
         window.location.href = '../login.html';
         return;
     }
     
-    console.log('Logged in as Storeman, BA Number:', baNumber);
+    console.log('Logged in as Storeman, BA Number:', userid);
     loadtotalitemdata();
     // Load all data
     loadAllPendingData();
@@ -52,10 +52,10 @@ let ranklist ={
 window.addEventListener('DOMContentLoaded', () => {
     const username=sessionStorage.getItem('username');
     const rank=sessionStorage.getItem('rank');
-    const banumber=sessionStorage.getItem('baNumber');
+    const userid=sessionStorage.getItem('userid');
     document.getElementById('username').textContent='Name: ' + username;
     document.getElementById('rank').textContent=ranklist[rank] ? 'Rank: ' + ranklist[rank] : 'Rank: ' + rank;
-    document.getElementById('banumber').textContent='Army No: ' + banumber;
+    document.getElementById('userid').textContent='Army No: ' + userid;
 });
 // Make this function globally available
 window.loadAllPendingData = loadAllPendingData;
@@ -356,8 +356,8 @@ window.markAsDisposed = function(itemId) {
 
 
 function changePassword() {
-    const baNumber = sessionStorage.getItem('baNumber');
-    if (!baNumber) {
+    const userid = sessionStorage.getItem('userid');
+    if (!userid) {
         console.error('BA Number not found in session storage.');
         window.location.href = 'index.html';return;
     }
@@ -372,7 +372,7 @@ function changePassword() {
         showNotification("New password must be at least 6 characters long", "error", "Validation Error");
         return;
     }
-    const userRef = ref(db, 'users/' + baNumber);
+    const userRef = ref(db, 'users/' + userid);
     get(userRef).then((snapshot) => {
         const userData = snapshot.val();
         if (userData) {

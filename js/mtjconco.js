@@ -25,19 +25,19 @@ console.log("Firebase Initialized");
 let allowedRoles = ['mtjco', 'mtnco', 'mto','cc', 'clo'];
 
 window.addEventListener('DOMContentLoaded', () => {
-    let baNumber = sessionStorage.getItem('baNumber');
+    let userid = sessionStorage.getItem('userid');
     let role = sessionStorage.getItem('role');
     if (!allowedRoles.includes(role)) {
         console.error('Unauthorized role for mto. Access denied.');
         window.location.href = 'index.html';
         return;
     }
-    if (!baNumber) {
+    if (!userid) {
         console.error('BA Number not found in local storage.');
         window.location.href = 'index.html';
         return;
     }
-    console.log('Logged in as BA Number:', baNumber);
+    console.log('Logged in as BA Number:', userid);
 });
  
 
@@ -122,15 +122,15 @@ const role = sessionStorage.getItem('role');
 window.addEventListener('DOMContentLoaded', () => {
     const username=sessionStorage.getItem('username');
     const rank=sessionStorage.getItem('rank');
-    const banumber=sessionStorage.getItem('baNumber');
+    const userid=sessionStorage.getItem('userid');
     document.getElementById('username').textContent='Name: ' + username;
     document.getElementById('rank').textContent=ranklist[rank] ? 'Rank: ' + ranklist[rank] : 'Rank: ' + rank;
     if(role === 'mtjco' || role === 'mtnco'){
-    document.getElementById('banumber').textContent='Army No: ' + banumber;
+    document.getElementById('userid').textContent='Army No: ' + userid;
     }
     else
     {
-    document.getElementById('banumber').textContent='BA Number: ' + banumber;
+    document.getElementById('userid').textContent='BA Number: ' + userid;
     }
 });
 
@@ -682,14 +682,14 @@ editForm?.addEventListener('submit', (e) => {
 const logoutButton = document.getElementById('logoutButton');
 
 logoutButton?.addEventListener('click', () => {
-    sessionStorage.removeItem('baNumber');
+    sessionStorage.removeItem('userid');
     window.location.href = 'index.html';
 });
 
 
 function changePassword() {
-    const baNumber = sessionStorage.getItem('baNumber');
-    if (!baNumber) {
+    const userid = sessionStorage.getItem('userid');
+    if (!userid) {
         console.error('BA Number not found in session storage.');
         window.location.href = 'index.html';
         return;
@@ -705,7 +705,7 @@ function changePassword() {
         showNotification("New password must be at least 6 characters long", "error", "Validation Error");
         return;
     }
-    const userRef = ref(db, 'users/' + baNumber);
+    const userRef = ref(db, 'users/' + userid);
     get(userRef).then((snapshot) => {
         const userData = snapshot.val();
         if (userData) {

@@ -75,7 +75,7 @@ const state = {
 };
 
 function looksLikeUser(value) {
-    return Boolean(value) && typeof value === "object" && ("baNumber" in value || "name" in value || "role" in value);
+    return Boolean(value) && typeof value === "object" && ("userid" in value || "name" in value || "role" in value);
 }
 
 function flattenUsers(node, currentPath = "users") {
@@ -91,7 +91,7 @@ function flattenUsers(node, currentPath = "users") {
             users.push({
                 key,
                 dbPath: nextPath,
-                baNumber: String(value.baNumber || key),
+                userid: String(value.userid || key),
                 name: value.name || "Unknown User",
                 rank: value.rank || "",
                 role: value.role || "",
@@ -191,7 +191,7 @@ function renderUsersTable(users) {
     tableBody.innerHTML = users.map((user, index) => `
         <tr>
             <td>${index + 1}</td>
-            <td>${user.baNumber}</td>
+            <td>${user.userid}</td>
             <td>${getRankLabel(user.rank)}</td>
             <td>${user.name}</td>
             <td>${getRoleLabel(user.role)}</td>
@@ -232,12 +232,12 @@ function renderStores() {
                 <div class="assignment-panel">
                     <div class="assignment-box">
                         <span>Officer</span>
-                        <strong>${officer ? `${officer.name} (${officer.baNumber})` : "Not assigned"}</strong>
+                        <strong>${officer ? `${officer.name} (${officer.userid})` : "Not assigned"}</strong>
                         <div class="status-pill ${officer ? "" : "unassigned"}">${officer ? getRoleLabel(officer.role) : "Pending"}</div>
                     </div>
                     <div class="assignment-box">
                         <span>Storeman</span>
-                        <strong>${storeman ? `${storeman.name} (${storeman.baNumber})` : "Not assigned"}</strong>
+                        <strong>${storeman ? `${storeman.name} (${storeman.userid})` : "Not assigned"}</strong>
                         <div class="status-pill ${storeman ? "" : "unassigned"}">${storeman ? getRoleLabel(storeman.role) : "Pending"}</div>
                     </div>
                 </div>
@@ -258,7 +258,7 @@ function filterUsers() {
     const searchValue = document.getElementById("userSearchInput")?.value.trim().toLowerCase() || "";
 
     state.filteredUsers = state.users.filter((user) => {
-        const haystack = [user.baNumber, user.name, getRankLabel(user.rank), getRoleLabel(user.role), user.store]
+        const haystack = [user.userid, user.name, getRankLabel(user.rank), getRoleLabel(user.role), user.store]
             .join(" ")
             .toLowerCase();
         return haystack.includes(searchValue);
@@ -276,7 +276,7 @@ function populateAssignUserOptions(type) {
     const eligibleUsers = state.users.filter((user) => type === "officer" ? isOfficer(user) : isStoreman(user));
 
     select.innerHTML = `<option value="">-- Select a user --</option>${eligibleUsers.map((user) => `
-        <option value="${user.baNumber}">${user.baNumber} - ${user.name} (${getRoleLabel(user.role)})</option>
+        <option value="${user.userid}">${user.userid} - ${user.name} (${getRoleLabel(user.role)})</option>
     `).join("")}`;
 }
 
@@ -361,15 +361,15 @@ async function createStore() {
 
 async function assignPersonnel() {
     const assignType = document.getElementById("assignType")?.value || state.activeAssignType;
-    const baNumber = document.getElementById("assignUser")?.value || "";
+    const userid = document.getElementById("assignUser")?.value || "";
     const storeCode = document.getElementById("assignStoreCode")?.value || "";
 
-    if (!storeCode || !baNumber) {
+    if (!storeCode || !userid) {
         showNotification("Select a user before assigning personnel.", "warning", "Validation Error");
         return;
     }
 
-    const user = state.users.find((entry) => entry.baNumber === baNumber);
+    const user = state.users.find((entry) => entry.userid === userid);
     if (!user) {
         showNotification("Selected user could not be found.", "error", "Assignment Failed");
         return;
@@ -379,7 +379,7 @@ async function assignPersonnel() {
     const storeRef = ref(db, `stores/${storeCode}`);
     await update(storeRef, {
         [storeField]: {
-            baNumber: user.baNumber,
+            userid: user.userid,
             name: user.name,
             role: user.role
         }

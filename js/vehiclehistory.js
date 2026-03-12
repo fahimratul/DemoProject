@@ -25,18 +25,18 @@ let vehicleKey = null;
 let role = sessionStorage.getItem('role');
 let allowedRoles = ['mtjco', 'mtnco', 'mto','cc', 'clo'];
 window.addEventListener('DOMContentLoaded', () => {
-    let baNumber = sessionStorage.getItem('baNumber');
+    let userid = sessionStorage.getItem('userid');
     if (!allowedRoles.includes(role)) {
         console.error('Unauthorized role for mto. Access denied.');
         window.location.href = 'index.html';
         return;
     }
-    if (!baNumber) {
+    if (!userid) {
         console.error('BA Number not found in local storage.');
         window.location.href = 'index.html';
         return;
     }
-    console.log('Logged in as BA Number:', baNumber);
+    console.log('Logged in as BA Number:', userid);
     
     // Add print button event listener
     document.getElementById('printHistoryBtn').addEventListener('click', printVehicleHistory);
@@ -271,7 +271,7 @@ function updateVehicleHistoryRecord(event, details, date) {
 function updaterecord(event, details, date, msg) {
     const voucherNo = Date.now().toString();
     if(role==='mtjco' || role==='mtnco'){
-        const baNumber = sessionStorage.getItem('baNumber');
+        const userid = sessionStorage.getItem('userid');
         let dbref = ref(db, `officernotification/mto/notifications/${voucherNo}`);
         const notificationData = {
             vehicleKey: vehicleKey,

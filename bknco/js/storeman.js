@@ -23,7 +23,7 @@ console.log(db);
 console.log("Firebase Initialized");
 
 window.addEventListener('DOMContentLoaded', () => {
-    let baNumber = sessionStorage.getItem('baNumber');
+    let userid = sessionStorage.getItem('userid');
     let role_type = sessionStorage.getItem('role_type');
     if (!role_type) { 
         console.error('Role type not found in session storage.');
@@ -31,13 +31,13 @@ window.addEventListener('DOMContentLoaded', () => {
         window.location.href = 'index.html';
         return;
     }
-    if (!baNumber) {
+    if (!userid) {
         console.error('BA Number not found in local storage.');
         alert('Session expired. Please log in again.');
         window.location.href = 'index.html';
         return;
     }
-    console.log('Logged in as BA Number:', baNumber);    
+    console.log('Logged in as BA Number:', userid);    
     initializePDFButtons();
     initializeIssueButton();
 });
@@ -67,11 +67,11 @@ const role = sessionStorage.getItem('role');
 window.addEventListener('DOMContentLoaded', () => {
     const username=sessionStorage.getItem('username');
     const rank=sessionStorage.getItem('rank');
-    const banumber=sessionStorage.getItem('baNumber');
+    const userid=sessionStorage.getItem('userid');
     document.getElementById('username').textContent='Name: ' + username;
     document.getElementById('rank').textContent=ranklist[rank] ? 'Rank: ' + ranklist[rank] : 'Rank: ' + rank;
     sessionStorage.setItem('rank_proper', ranklist[rank] ? ranklist[rank] : rank);
-    document.getElementById('banumber').textContent='Army No: ' + banumber;
+    document.getElementById('userid').textContent='Army No: ' + userid;
 });
 
 
@@ -463,7 +463,7 @@ const logoutButton = document.getElementById('logoutButton');
 
 
 logoutButton?.addEventListener('click', () => {
-    sessionStorage.removeItem('baNumber');
+    sessionStorage.removeItem('userid');
     sessionStorage.removeItem('role_type');
     sessionStorage.removeItem('username');
     sessionStorage.removeItem('rank');
@@ -471,8 +471,8 @@ logoutButton?.addEventListener('click', () => {
 });
 
 function changePassword() {
-    const baNumber = sessionStorage.getItem('baNumber');
-    if (!baNumber) {
+    const userid = sessionStorage.getItem('userid');
+    if (!userid) {
         console.error('BA Number not found in session storage.');
         window.location.href = 'index.html';return;
     }
@@ -487,7 +487,7 @@ function changePassword() {
         showNotification("New password must be at least 6 characters long", "error", "Validation Error");
         return;
     }
-    const userRef = ref(db, 'users/' + baNumber);
+    const userRef = ref(db, 'users/' + userid);
     get(userRef).then((snapshot) => {
         const userData = snapshot.val();
         if (userData) {
@@ -611,7 +611,7 @@ function updatePrintButtonStates() {
 }
 
 function printAllTable() {
-    const baNumber = sessionStorage.getItem('baNumber');
+    const userid = sessionStorage.getItem('userid');
     const tableBody = document.getElementById('itemTableBody');
     
     if (!tableBody || tableBody.rows.length === 0) {
@@ -662,7 +662,7 @@ function printAllTable() {
 }
 
 function printSelectedRows() {
-    const baNumber = sessionStorage.getItem('baNumber');
+    const userid = sessionStorage.getItem('userid');
     const selectedCheckboxes = document.querySelectorAll('.row-select:checked');
     
     if (selectedCheckboxes.length === 0) {

@@ -26,8 +26,8 @@ let typeKey = null;
 let role = sessionStorage.getItem('role');
 
 window.addEventListener('DOMContentLoaded', () => {
-    let baNumber = sessionStorage.getItem('baNumber');
-    if (!baNumber) {
+    let userid = sessionStorage.getItem('userid');
+    if (!userid) {
         console.error('BA Number not found in local storage.');
         window.location.href = 'index.html';
         return;

@@ -22,16 +22,16 @@ let itemCounter = 0;
 
 window.addEventListener('DOMContentLoaded', () => {
     // Check authentication
-    const baNumber = sessionStorage.getItem('baNumber');
+    const userid = sessionStorage.getItem('userid');
     const role_type = sessionStorage.getItem('role_type');
     
-    if (!role_type || !baNumber) {
+    if (!role_type || !userid) {
         alert('Session expired. Please log in again.');
         window.location.href = 'index.html';
         return;
     }
     
-    console.log('Logged in as BA Number:', baNumber);
+    console.log('Logged in as BA Number:', userid);
     document.getElementById('issuedate').valueAsDate = new Date();
     // Initialize the page
     loadInventoryData();
@@ -233,7 +233,7 @@ function processIssueRequest() {
         }
         set(ref(db, `bkncoinventory/${itemKey}/unsvc/${voucherNumber}`), {
             date: issueDate,
-            issued_by: sessionStorage.getItem('baNumber'),
+            issued_by: sessionStorage.getItem('userid'),
             quantity: quantity,
             reason: reason
         });

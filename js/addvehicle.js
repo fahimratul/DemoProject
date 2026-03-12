@@ -25,7 +25,7 @@ import {showNotification} from './notification.js';
 console.log("Add Item Script Loaded");
 
 window.addEventListener('DOMContentLoaded', () => {
-    let baNumber = sessionStorage.getItem('baNumber');
+    let userid = sessionStorage.getItem('userid');
     let role = sessionStorage.getItem('role');
     if(role !== 'mtjco' && role!== 'mtnco' && role !== 'mto'){
         console.error('Unauthorized access. Redirecting to login.');
@@ -33,12 +33,12 @@ window.addEventListener('DOMContentLoaded', () => {
         return;
     }
 
-    if (!baNumber) {
+    if (!userid) {
         console.error('BA Number not found in session storage.');
         window.location.href = 'index.html';
         return;
     }
-    console.log('Logged in as BA Number:', baNumber);
+    console.log('Logged in as BA Number:', userid);
 });
 
 
@@ -92,21 +92,21 @@ function checkInventoryItem(number) {
 }
 
 
-function writeInventoryItem(baNumber, classtype, conditionValue, typeofvehicleValue, unnumberValue, campValue) {
-    checkInventoryItem(baNumber).then((exists) => {
+function writeInventoryItem(userid, classtype, conditionValue, typeofvehicleValue, unnumberValue, campValue) {
+    checkInventoryItem(userid).then((exists) => {
         if (exists) {
-            console.log("Vehicle with this name already exists:", baNumber);
-            showNotification(`Vehicle with ${baNumber} number already exists. Please choose a different number.`, "error", "Error");
+            console.log("Vehicle with this name already exists:", userid);
+            showNotification(`Vehicle with ${userid} number already exists. Please choose a different number.`, "error", "Error");
         } else {    
-                set(ref(db, `vehiclelist/` + baNumber),{
-                vehicleNumber: baNumber,
+                set(ref(db, `vehiclelist/` + userid),{
+                vehicleNumber: userid,
                 unnumber: unnumberValue,
                 typeofvehicle: typeofvehicleValue,
                 classtype: classtype,
                 condition: conditionValue,
                 camp: campValue
             });
-            console.log("Vehicle added:", baNumber);
+            console.log("Vehicle added:", userid);
             showNotification("Vehicle added successfully!", "success", "Success");
         }   
         }).catch((error) => {   

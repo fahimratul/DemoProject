@@ -23,13 +23,13 @@ const db = getDatabase(app);
 console.log("Firebase Initialized for Add User");
 
 window.addEventListener('DOMContentLoaded', () => {
-    let baNumber = sessionStorage.getItem('baNumber');
-    if (!baNumber) {
+    let userid = sessionStorage.getItem('userid');
+    if (!userid) {
         console.error('BA Number not found in session storage.');
         window.location.href = 'index.html';
         return;
     }
-    console.log('Logged in as BA Number:', baNumber);
+    console.log('Logged in as BA Number:', userid);
 });
 
 // Handle form submission
@@ -38,7 +38,7 @@ addUserForm.addEventListener('submit', async (e) => {
     e.preventDefault();
     
     // Get form values
-    const baNumber = document.getElementById('ba-number').value.trim();
+    const userid = document.getElementById('ba-number').value.trim();
     const name = document.getElementById('name').value.trim();
     const rank = document.getElementById('rank').value.trim();
     const password = document.getElementById('password').value;
@@ -46,7 +46,7 @@ addUserForm.addEventListener('submit', async (e) => {
     const role = document.getElementById('role').value;
 
     // Validation
-    if (!baNumber || !name || !rank || !password || !role) {
+    if (!userid || !name || !rank || !password || !role) {
         showNotification("Please fill in all required fields", "error", "Validation Error");
         return;
     }
@@ -63,21 +63,21 @@ addUserForm.addEventListener('submit', async (e) => {
 
     // Check if user already exists
     try {
-        const userRef = ref(db, 'users/' + baNumber);
+        const userRef = ref(db, 'users/' + userid);
         const snapshot = await get(userRef);
 
         if (snapshot.exists()) {
             showNotification("User with this BA Number already exists", "error", "User Exists");
             return;
         }
-        set(ref(db, 'users/' + baNumber), {
-            baNumber: baNumber,
+        set(ref(db, 'users/' + userid), {
+            userid: userid,
             name: name,
             rank: rank,
             password: password,
             role: role
         });
-        console.log("User added:", baNumber);
+        console.log("User added:", userid);
         showNotification("User added successfully", "success", "Success");
         addUserForm.reset();
     } catch (error) {

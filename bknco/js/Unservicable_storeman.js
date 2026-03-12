@@ -22,16 +22,16 @@ let itemCounter = 0;
 
 window.addEventListener('DOMContentLoaded', () => {
     // Check authentication
-    const baNumber = sessionStorage.getItem('baNumber');
+    const userid = sessionStorage.getItem('userid');
     const role_type = sessionStorage.getItem('role_type');
     
-    if (!role_type || !baNumber) {
+    if (!role_type || !userid) {
         alert('Session expired. Please log in again.');
         window.location.href = 'index.html';
         return;
     }
     
-    console.log('Logged in as BA Number:', baNumber);
+    console.log('Logged in as BA Number:', userid);
     document.getElementById('issuedate').valueAsDate = new Date();
     // Initialize the page
     loadInventoryData();
@@ -556,7 +556,7 @@ function printUnserviceableVoucher(voucherNumber, issueDate, itemsToIssue) {
                         <p class="signature-label">Issued By:</p>
                         <p class="signature-username"><strong>${sessionStorage.getItem('username')}</strong></p>
                         <p  class="signature-username">${sessionStorage.getItem('rank_proper')}</p>
-                        <p class="signature-username">${sessionStorage.getItem('baNumber')}</p>
+                        <p class="signature-username">${sessionStorage.getItem('userid')}</p>
                         <div class="signature-line2"></div>
                         <p class="signature-note">Signature & Date</p>
                     </div>

@@ -23,7 +23,7 @@ console.log(db);
 console.log("Firebase Initialized");
 
 window.addEventListener('DOMContentLoaded', () => {
-    let baNumber = sessionStorage.getItem('baNumber');
+    let userid = sessionStorage.getItem('userid');
     let roleType = sessionStorage.getItem('role_type');
     console.log('Role Type from sessionStorage:', roleType);
     if (!roleType || roleType !== 'officer' && roleType !== 'clo' && roleType !=='cc') {
@@ -31,12 +31,12 @@ window.addEventListener('DOMContentLoaded', () => {
         window.location.href = 'index.html';
         return;
     }
-    if (!baNumber) {
+    if (!userid) {
         console.error('BA Number not found in local storage.');
         window.location.href = 'index.html';
         return;
     }
-    console.log('Logged in as BA Number:', baNumber);
+    console.log('Logged in as BA Number:', userid);
     if(roleType === 'clo' || roleType === 'cc'){
         document.getElementById('PendingUser').style.display = 'inline-block';
     }
@@ -132,13 +132,13 @@ function loaditemdata() {
                 if(item.role === 'cc' || item.role === 'clo'){
                     continue; // Skip CC and CLO from user list
                 }
-                const banumber = item.baNumber || '';
+                const userid = item.userid || '';
                 const rank = item.rank || '';
                 const name = item.name || '';
                 const role = item.role || '';
-                html += `<tr id="${banumber}" data-key="${key}">
+                html += `<tr id="${userid}" data-key="${key}">
                             <td>${serial}</td>
-                            <td>${banumber}</td>
+                            <td>${userid}</td>
                             <td>${ranklist[rank] || rank}</td>
                             <td>${name}</td>
                             <td>${userrole[role] || role}</td>
@@ -181,7 +181,7 @@ function loaditemdata() {
 
 
 function pendingApprovalCount() {
-    const dbRef = ref(db, 'cloapproval/users/');
+    const dbRef = ref(db, 'approval/users/');
     get(dbRef).then((snapshot) => {
         const data = snapshot.val();
         let serial = 1;
@@ -199,13 +199,13 @@ function pendingApprovalCount() {
         if (data) {
             for (const key in data) {
                 const item = data[key];
-                const banumber = item.baNumber || '';
+                const userid = item.userid || '';
                 const rank = item.rank || '';
                 const name = item.name || '';
                 const role = item.role || '';
-                html += `<tr id="${banumber}" data-key="${key}">
+                html += `<tr id="${userid}" data-key="${key}">
                             <td>${serial}</td>
-                            <td>${banumber}</td>
+                            <td>${userid}</td>
                             <td>${ranklist[rank] || rank}</td>
                             <td>${name}</td>
                             <td>${userrole[role] || role}</td>
@@ -273,7 +273,7 @@ function approve(key) {
         showNotification('Guests are not authorized to approve users.', 'error', 'Unauthorized Action');
         return;
     }
-    const userRef = ref(db, 'cloapproval/users/' + key);
+    const userRef = ref(db, 'approval/users/' + key);
     get(userRef).then((snapshot) => {
         const userData = snapshot.val();
         if (userData) {
@@ -304,7 +304,7 @@ function reject(key) {
         showNotification('Guests are not authorized to reject users.', 'error', 'Unauthorized Action');
         return;
     }
-    const userRef = ref(db, 'cloapproval/users/' + key);
+    const userRef = ref(db, 'approval/users/' + key);
     remove(userRef).then(() => {
         showNotification('User rejected successfully', 'success');
         pendingApprovalCount();

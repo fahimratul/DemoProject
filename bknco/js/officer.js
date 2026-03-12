@@ -23,7 +23,7 @@ console.log(db);
 console.log("Firebase Initialized");
 
 window.addEventListener('DOMContentLoaded', () => {
-    let baNumber = sessionStorage.getItem('baNumber');
+    let userid = sessionStorage.getItem('userid');
     let role_type = sessionStorage.getItem('role_type');
     if (!role_type) { 
         console.error('Role type not found in session storage.');
@@ -37,13 +37,13 @@ window.addEventListener('DOMContentLoaded', () => {
         window.location.href = 'index.html';
         return;
     }
-    if (!baNumber) {
+    if (!userid) {
         console.error('BA Number not found in local storage.');
         alert('Session expired. Please log in again.');
         window.location.href = 'index.html';
         return;
     }
-    console.log('Logged in as BA Number:', baNumber);
+    console.log('Logged in as BA Number:', userid);
     
     // PDF functionality
     initializePDFButtons();
@@ -73,11 +73,11 @@ const role = sessionStorage.getItem('role');
 window.addEventListener('DOMContentLoaded', () => {
     const username=sessionStorage.getItem('username');
     const rank=sessionStorage.getItem('rank');
-    const banumber=sessionStorage.getItem('baNumber');
+    const userid=sessionStorage.getItem('userid');
     document.getElementById('username').textContent='Name: ' + username;
     document.getElementById('rank').textContent=ranklist[rank] ? 'Rank: ' + ranklist[rank] : 'Rank: ' + rank;
     sessionStorage.setItem('rank_proper', ranklist[rank] ? ranklist[rank] : rank);
-    document.getElementById('banumber').textContent='BA Number: ' + banumber;
+    document.getElementById('userid').textContent='BA Number: ' + userid;
 });
 
 
@@ -406,7 +406,7 @@ function approveNewtotalItem(key) {
     });
     set(ref(db, 'clo_cc_notification/' + Date.now()), {
         from: 'BK NCO Inventory',
-        msg: `BK NCO Inventory item "${currentItem.name || ''}" total has been updated by ${sessionStorage.getItem('username')} (BA Number: ${sessionStorage.getItem('baNumber')}).`,
+        msg: `BK NCO Inventory item "${currentItem.name || ''}" total has been updated by ${sessionStorage.getItem('username')} (BA Number: ${sessionStorage.getItem('userid')}).`,
         date: new Date().toLocaleString()
     }).then(() => {
         console.log('CLO/CC notified successfully about the update.');
@@ -448,7 +448,7 @@ function approveNewItem(key) {
     });
     set(ref(db, 'clo_cc_notification/' + Date.now()), {
         from: 'BK NCO Inventory',
-        msg: `New BK NCO Inventory item "${newItem.name || ''}" has been added by ${sessionStorage.getItem('username')} (BA Number: ${sessionStorage.getItem('baNumber')}).`,
+        msg: `New BK NCO Inventory item "${newItem.name || ''}" has been added by ${sessionStorage.getItem('username')} (BA Number: ${sessionStorage.getItem('userid')}).`,
         date: new Date().toLocaleString()
     }).then(() => {
         console.log('CLO/CC notified successfully about the new item.');
@@ -813,7 +813,7 @@ editForm?.addEventListener('submit', (e) => {
         set(ref(db, 'clo_cc_notification/' + Date.now()), {
             from: 'BK NCO Inventory',
             date: new Date().toLocaleString(),
-            msg: `BK NCO Inventory item "${inputs.name.value.trim()}" has been updated by ${sessionStorage.getItem('username')} (BA Number: ${sessionStorage.getItem('baNumber')}).`
+            msg: `BK NCO Inventory item "${inputs.name.value.trim()}" has been updated by ${sessionStorage.getItem('username')} (BA Number: ${sessionStorage.getItem('userid')}).`
         }).then(() => {
             console.log('CLO/CC notified successfully about the update.');
         }).catch((error) => {
@@ -851,7 +851,7 @@ deleteItemBtn?.addEventListener('click', (e) => {
     set(ref(db, 'clo_cc_notification/' + Date.now()), {
         from: 'BK NCO Inventory',
         date: new Date().toLocaleString(),
-        msg: `BK NCO Inventory item "${inputs.name.value.trim()}" has been deleted by ${sessionStorage.getItem('username')} (BA Number: ${sessionStorage.getItem('baNumber')}).`
+        msg: `BK NCO Inventory item "${inputs.name.value.trim()}" has been deleted by ${sessionStorage.getItem('username')} (BA Number: ${sessionStorage.getItem('userid')}).`
     }).then(() => {
         console.log('CLO/CC notified successfully about the deletion.');
     }).catch((error) => {
@@ -862,7 +862,7 @@ deleteItemBtn?.addEventListener('click', (e) => {
 const logoutButton = document.getElementById('logoutButton');
 
 logoutButton?.addEventListener('click', () => {
-    sessionStorage.removeItem('baNumber');
+    sessionStorage.removeItem('userid');
     sessionStorage.removeItem('role_type');
     sessionStorage.removeItem('username');
     sessionStorage.removeItem('rank');
@@ -870,8 +870,8 @@ logoutButton?.addEventListener('click', () => {
 });
 
 function changePassword() {
-    const baNumber = sessionStorage.getItem('baNumber');
-    if (!baNumber) {
+    const userid = sessionStorage.getItem('userid');
+    if (!userid) {
         console.error('BA Number not found in session storage.');
         window.location.href = 'index.html';return;
     }
@@ -886,7 +886,7 @@ function changePassword() {
         showNotification("New password must be at least 6 characters long", "error", "Validation Error");
         return;
     }
-    const userRef = ref(db, 'users/' + baNumber);
+    const userRef = ref(db, 'users/' + userid);
     get(userRef).then((snapshot) => {
         const userData = snapshot.val();
         if (userData) {
@@ -1010,7 +1010,7 @@ function updatePrintButtonStates() {
 }
 
 function printAllTable() {
-    const baNumber = sessionStorage.getItem('baNumber');
+    const userid = sessionStorage.getItem('userid');
     const tableBody = document.getElementById('itemTableBody');
     
     if (!tableBody || tableBody.rows.length === 0) {
@@ -1061,7 +1061,7 @@ function printAllTable() {
 }
 
 function printSelectedRows() {
-    const baNumber = sessionStorage.getItem('baNumber');
+    const userid = sessionStorage.getItem('userid');
     const selectedCheckboxes = document.querySelectorAll('.row-select:checked');
     
     if (selectedCheckboxes.length === 0) {

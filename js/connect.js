@@ -49,33 +49,33 @@ document.getElementById('password').addEventListener('keypress', function(event)
 
 function handlelogin() {
     console.log("Login button clicked");
-    const banumber = document.getElementById('ba-number').value;
+    const userid = document.getElementById('ba-number').value;
     const password = document.getElementById('password').value;
     const rememberMe = document.getElementById('remember-me').checked;
 
-    if (!banumber || !password) {
+    if (!userid || !password) {
         showNotification("Please fill in all fields", "error", "Login Failed");
         return;
     }
     let dbRef;
     const role_type = sessionStorage.getItem('role_type');
     if( role_type === 'guest') {
-    dbRef = ref(db, 'users/guest/' + banumber);
+    dbRef = ref(db, 'users/guest/' + userid);
     }
     else if (role_type === 'admin') {
-        dbRef = ref(db, 'users/admin/' + banumber);
+        dbRef = ref(db, 'users/admin/' + userid);
     }
     else if (role_type === 'storeman') {
-        dbRef = ref(db, 'users/storeman/' + banumber);
+        dbRef = ref(db, 'users/storeman/' + userid);
     }
     else if (role_type === 'officer') {
-        dbRef = ref(db, 'users/officer/' + banumber);
+        dbRef = ref(db, 'users/officer/' + userid);
     }
     else if (role_type === 'cc') {
-        dbRef = ref(db, 'users/cc/' + banumber);
+        dbRef = ref(db, 'users/cc/' + userid);
     }
     else if( role_type === 'clo') {
-        dbRef = ref(db, 'users/clo/' + banumber);
+        dbRef = ref(db, 'users/clo/' + userid);
     }
     
     get(dbRef).then((snapshot) => {
@@ -85,16 +85,16 @@ function handlelogin() {
             const userRank = userData.rank;
             if (userData.password === password) {
                 console.log("Login successful");
-                sessionStorage.setItem('baNumber', banumber);
+                sessionStorage.setItem('userid', userid);
                 sessionStorage.setItem('role', role);
                 sessionStorage.setItem('username', userData.name);
                 sessionStorage.setItem('rank', userData.rank);
                 if (rememberMe) {
-                    localStorage.setItem('baNumber', banumber);
+                    localStorage.setItem('userid', userid);
                     localStorage.setItem('password', password);
                     console.log("Credentials saved to localStorage");
                 } else {
-                    localStorage.removeItem('baNumber');
+                    localStorage.removeItem('userid');
                     localStorage.removeItem('password');
                     localStorage.removeItem('role');
                 }

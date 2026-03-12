@@ -30,7 +30,7 @@
             <input type="checkbox" id="remember-me"><p> Remember me</p>
         </div>
         <button id="login-button">Login</button>
-        <p id="officer_signup" onclick="window.location.href='officer_signup.html'"  style="text-align: center;cursor:pointer; display: none;">Create Account</p>
+        <p id="officer_signup" onclick="window.location.href='officer_signup.html'"  style="text-align: center;cursor:pointer;">Create Account</p>
         <br>
         <p onclick="window.location.href='index.html'" style="text-align: center;cursor:pointer">&larr; Go Back</p> 
     </div>
@@ -46,8 +46,8 @@
             toast.classList.remove("show");
         }
         window.addEventListener('DOMContentLoaded', () => {
-            if (localStorage.getItem('baNumber') && localStorage.getItem('password')) {
-                document.getElementById('ba-number').value = localStorage.getItem('baNumber');
+            if (localStorage.getItem('userid') && localStorage.getItem('password')) {
+                document.getElementById('ba-number').value = localStorage.getItem('userid');
                 document.getElementById('password').value = localStorage.getItem('password');
                 document.getElementById('remember-me').checked = true;
             }
@@ -58,10 +58,9 @@
                 document.getElementById('ba-number-label').textContent ='Army No';
             } else if (roletype ==='officer') {
                 titleElement.textContent = 'Officer Login';
-                document.getElementById('officer_signup').style.display = 'block';
             } 
             else if (roletype ==='clo') {
-                titleElement.textContent = 'Welcome Cheif Logisitics Officer';
+                titleElement.textContent = 'Welcome Cheif Logistics Officer';
                 document.getElementById('ba-number-label').textContent ='Army No';
             } 
             else if (roletype ==='cc') {
@@ -75,7 +74,6 @@
                 sessionStorage.removeItem('role_type');
                 sessionStorage.setItem('role_type', 'clo');
                 document.getElementById('ba-number-label').textContent ='Army No';
-                document.getElementById('officer_signup').style.display = 'block';
                 console.log(roletype);
             }
             else {

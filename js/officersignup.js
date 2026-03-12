@@ -4,16 +4,17 @@ import { getDatabase, set, get, ref } from "https://www.gstatic.com/firebasejs/1
 import { showNotification } from './notification.js';
 
 // Firebase configuration
-const firebaseConfig = {
-    apiKey: "AIzaSyCIX-3-GunSudlllY-dFRo943ysFXtBiOk",
-    authDomain: "bdarmystoremgt.firebaseapp.com",
-    databaseURL: "https://bdarmystoremgt-default-rtdb.firebaseio.com",
-    projectId: "bdarmystoremgt",
-    storageBucket: "bdarmystoremgt.firebasestorage.app",
-    messagingSenderId: "960978586847",
-    appId: "1:960978586847:web:afcee2217a1c3c876ead6a",
-    measurementId: "G-H27M1SNMPX"
-};
+  const firebaseConfig = {
+    apiKey: "AIzaSyBUis8E99I4feTN2D2Opivn1rwyZe7DmPU",
+    authDomain: "fir-3842a.firebaseapp.com",
+    databaseURL: "https://fir-3842a-default-rtdb.asia-southeast1.firebasedatabase.app",
+    projectId: "fir-3842a",
+    storageBucket: "fir-3842a.firebasestorage.app",
+    messagingSenderId: "904490469367",
+    appId: "1:904490469367:web:53595ab4b9d2a1c65810f2",
+    measurementId: "G-EEZ0XX89X5"
+  };
+
 
 // Initialize Firebase
 const app = initializeApp(firebaseConfig);
@@ -21,6 +22,8 @@ const analytics = getAnalytics(app);
 const db = getDatabase(app);
 
 console.log("Firebase Initialized for Add User");
+const role_type = sessionStorage.getItem('role_type');
+console.log("Role Type from Session Storage:", role_type);
 
 window.addEventListener('DOMContentLoaded', () => {
     let roletype = sessionStorage.getItem('role_type');
@@ -29,6 +32,30 @@ window.addEventListener('DOMContentLoaded', () => {
         window.location.href = 'index.html';
         return;
     }
+    const roleSelect = document.getElementById('role');
+    const dbRef = ref(db, 'roles/' + roletype);
+    get(dbRef).then((snapshot) => {
+        if (snapshot.exists()) {
+            const roles = snapshot.val();
+            for (const key in roles) {
+                if (roles.hasOwnProperty(key)) {
+                    const option = document.createElement('option');
+                    option.value = key;
+                    option.textContent = roles[key];
+                    roleSelect.appendChild(option);
+                }
+            }
+        } else {
+            console.warn('No roles found for role type:', roletype);
+            const option = document.createElement('option');
+            option.value = 'admin';
+            option.textContent = 'Admin';
+
+            roleSelect.appendChild(option);
+        }
+    }).catch((error) => {
+        console.error('Error fetching roles:', error);
+    });
 });
 
 // Handle form submission
@@ -37,7 +64,7 @@ addUserForm.addEventListener('submit', async (e) => {
     e.preventDefault();
     
     // Get form values
-    const baNumber = document.getElementById('ba-number').value.trim();
+    const userid = document.getElementById('ba-number').value.trim();
     const name = document.getElementById('name').value.trim();
     const rank = document.getElementById('rank').value.trim();
     const password = document.getElementById('password').value;
@@ -45,7 +72,7 @@ addUserForm.addEventListener('submit', async (e) => {
     const role = document.getElementById('role').value;
 
     // Validation
-    if (!baNumber || !name || !rank || !password || !role) {
+    if (!userid || !name || !rank || !password || !role) {
         showNotification("Please fill in all required fields", "error", "Validation Error");
         return;
     }
@@ -62,21 +89,21 @@ addUserForm.addEventListener('submit', async (e) => {
 
     // Check if user already exists
     try {
-        const userRef = ref(db, 'users/' + baNumber);
+        const userRef = ref(db, 'users/'+role_type + '/' + userid);
         const snapshot = await get(userRef);
 
         if (snapshot.exists()) {
             showNotification("User with this BA Number already exists", "error", "User Exists");
             return;
         }
-        set(ref(db, 'cloapproval/users/' + baNumber), {
-            baNumber: baNumber,
+        set(ref(db, 'approval/' + role_type + '/' + userid), {
+            userid: userid,
             name: name,
             rank: rank,
             password: password,
             role: role
         });
-        console.log("User added to CLO approval queue:", baNumber);
+        console.log("User added to CLO approval queue:", userid);
         showNotification("Account created successfully and pending approval", "success", "Success");
         setTimeout(() => {        
             addUserForm.reset();

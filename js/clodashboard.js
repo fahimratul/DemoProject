@@ -23,7 +23,7 @@ console.log(db);
 console.log("Firebase Initialized");
 
 window.addEventListener('DOMContentLoaded', () => {
-    let baNumber = sessionStorage.getItem('baNumber');
+    let userid = sessionStorage.getItem('userid');
     let role_type = sessionStorage.getItem('role_type');
     if (!role_type) { 
         console.error('Role type not found in session storage.');
@@ -37,13 +37,13 @@ window.addEventListener('DOMContentLoaded', () => {
         window.location.href = 'index.html';
         return;
     }
-    if (!baNumber) {
+    if (!userid) {
         console.error('BA Number not found in local storage.');
         alert('Session expired. Please log in again.');
         window.location.href = 'index.html';
         return;
     }
-    console.log('Logged in as BA Number:', baNumber);
+    console.log('Logged in as BA Number:', userid);
 });
 
 let ranklist ={
@@ -67,10 +67,10 @@ const role = sessionStorage.getItem('role');
 window.addEventListener('DOMContentLoaded', () => {
     const username=sessionStorage.getItem('username');
     const rank=sessionStorage.getItem('rank');
-    const banumber=sessionStorage.getItem('baNumber');
+    const userid=sessionStorage.getItem('userid');
     document.getElementById('username').textContent='Name: ' + username;
     document.getElementById('rank').textContent=ranklist[rank] ? 'Rank: ' + ranklist[rank] : 'Rank: ' + rank;
-    document.getElementById('banumber').textContent='BA Number: ' + banumber;
+    document.getElementById('userid').textContent='BA Number: ' + userid;
     const titleElement = document.getElementById('title');
     if(role === 'cc'){
         
@@ -139,7 +139,7 @@ loaditemdata('stationary', 'stationary/main/');
 const logoutButton = document.getElementById('logoutButton');
 
 logoutButton?.addEventListener('click', () => {
-    sessionStorage.removeItem('baNumber');
+    sessionStorage.removeItem('userid');
     sessionStorage.removeItem('role_type');
     sessionStorage.removeItem('username');
     sessionStorage.removeItem('rank');
@@ -219,11 +219,11 @@ function loadvehicledata() {
 loadvehicledata();
 
 document.getElementById('passwordChangeSubmitBtn').addEventListener('click', () => {
-    const newBaNumber = document.getElementById('banumber').value.trim();
+    const newuserid = document.getElementById('userid').value.trim();
     const newRank = document.getElementById('rank').value.trim();
-    const baNumber = sessionStorage.getItem('baNumber');
+    const userid = sessionStorage.getItem('userid');
     const name = document.getElementById('name').textContent;
-    if (!newBaNumber || !newRank) {
+    if (!newuserid || !newRank) {
         showNotification("BA Number and Rank cannot be empty.", "warning", "Input Error");
         return;
     }
@@ -233,16 +233,16 @@ document.getElementById('passwordChangeSubmitBtn').addEventListener('click', () 
         showNotification("Passwords do not match.", "error", "Input Error");
         return;
     }
-    remove(ref(db, `officers/${baNumber}`)).then(() => {
+    remove(ref(db, `officers/${userid}`)).then(() => {
         const newOfficerData = {
             name: name,
             rank: newRank,
-            baNumber: newBaNumber,
+            userid: newuserid,
             role_type: 'clo',
             password: password
         };
-        set(ref(db, `users/${newBaNumber}`), newOfficerData).then(() => {
-            sessionStorage.setItem('baNumber', newBaNumber);
+        set(ref(db, `users/${newuserid}`), newOfficerData).then(() => {
+            sessionStorage.setItem('userid', newuserid);
             sessionStorage.setItem('rank', newRank);
             showNotification("Information updated successfully. Please log in again.", "success", "Update Successful");
             setTimeout(() => {

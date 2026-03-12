@@ -25,16 +25,16 @@ import {showNotification} from './notification.js';
 console.log("Add Item Script Loaded");
 
 window.addEventListener('DOMContentLoaded', () => {
-    let baNumber = sessionStorage.getItem('baNumber');
+    let userid = sessionStorage.getItem('userid');
     let roleType = sessionStorage.getItem('role_type');
     console.log('Role Type from sessionStorage:', roleType);
     
-    if (!baNumber) {
+    if (!userid) {
         console.error('BA Number not found in session storage.');
         window.location.href = 'index.html';
         return;
     }
-    console.log('Logged in as BA Number:', baNumber);
+    console.log('Logged in as BA Number:', userid);
 });
 
 const role = sessionStorage.getItem('role');

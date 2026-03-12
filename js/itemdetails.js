@@ -26,14 +26,14 @@ let typeKey = null;
 let role = sessionStorage.getItem('role');
 
 window.addEventListener('DOMContentLoaded', () => {
-    let baNumber = sessionStorage.getItem('baNumber');
-    if (!baNumber) {
+    let userid = sessionStorage.getItem('userid');
+    if (!userid) {
         console.error('BA Number not found in local storage.');
         window.location.href = 'index.html';
         return;
     }
 
-    console.log('Logged in as BA Number:', baNumber);
+    console.log('Logged in as BA Number:', userid);
 });
  
 
@@ -330,7 +330,7 @@ issueForm.addEventListener('submit', (e) => {
         person: person,
         location: location,
         quantity: quantity,
-        issued_by: sessionStorage.getItem('baNumber')
+        issued_by: sessionStorage.getItem('userid')
     };
     if(quantity <=0 || quantity > dataCache.servicable){
         showNotification('Error: Invalid quantity', 'error');
@@ -491,7 +491,7 @@ unsvcForm.addEventListener('submit', (e) => {
         date: date,
         reason: reason,
         quantity: quantity,
-        marked_by: sessionStorage.getItem('baNumber')
+        marked_by: sessionStorage.getItem('userid')
     };
 
     if(role_type === 'officer' || role_type === 'cc' || role_type === 'clo'){

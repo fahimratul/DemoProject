@@ -3,8 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <link rel="stylesheet" href="css/adduser.css">
-    <link rel="stylesheet" href="css/notification.css">
+    <link rel="stylesheet" href="css/officer_signup.css">
     <link rel='icon' href='static/logo_small.png' type='image/x-icon' />
     <title>Officer Signup</title>
 </head>
@@ -23,10 +22,6 @@
         
         <form id="add-user-form">
             <div class="form-group">
-                <label for="ba-number">BA Number *</label>
-                <input type="number" id="ba-number" name="ba-number" placeholder="Enter BA number">
-            </div>
-            <div class="form-group">
                 <label for="rank">Select Rank *</label>
                 <select name="rank" id="rank" >
                     <option value="">-- Select Rank --</option>
@@ -34,15 +29,27 @@
                     <option value="capt">Captain</option>
                     <option value="major">Major</option>
                     <option value="ltcol">Lieutenant Colonel</option>
-<option value="Colonel">Colonel</option>
-<option value="Major General">Major General</option>
-<option value="Brigadier General">Brigadier General</option>
-
+                    <option value="Colonel">Colonel</option>
+                    <option value="Major General">Major General</option>
+                    <option value="Brigadier General">Brigadier General</option>
                 </select>
             </div>
+
             <div class="form-group">
                 <label for="name">Name *</label>
                 <input type="text" id="name" name="name" placeholder="Enter name" >
+            </div>
+
+            <div class="form-group">
+                <label for="ba-number">BA Number *</label>
+                <input type="number" id="ba-number" name="ba-number" placeholder="Enter BA number">
+            </div>
+            
+            <div class="form-group">
+                <label for="role">Select Role *</label>
+                <select name="role" id="role" >
+                    <!-- <option value="">-- dynamically populated --</option> -->
+                </select>
             </div>
 
             <div class="form-group pass">
@@ -56,7 +63,7 @@
                     </svg>
                 </button>
             </div>
-
+            
             <div class="form-group pass">
                 <label for="confirm-password" class="form-label">Confirm Password *</label>
                 <input type="password" id="confirm-password" class="form-input" placeholder="Confirm password">
@@ -69,21 +76,6 @@
                 </button>
             </div>
 
-            <div class="form-group">
-                <label for="role">Select Role *</label>
-                <select name="role" id="role" >
-                    <option value="">-- Select Role --</option>
-                    <option value="lo">Logistic Officer</option>
-                    <option value="so">Signal Officer</option>
-                    <option value="eo">Engineer Officer</option>
-                    <option value="mto"> Military Transport Officer</option>
-                    <option value="workshop">Workshop Officer</option>
-                    <option value="medical">Medical Officer</option>
-                    <option value="stationary">Adjutant</option>
-                    <option value="cimic">Cimic Officer</option>
-                    <option value="guest">Guest</option>
-                </select>
-            </div>
 
             <div class="button-group">
                 <button type="submit" id="add-user-button" class="submit-button">
