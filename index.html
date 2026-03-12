@@ -1,0 +1,57 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="css/home.css">
+    <link rel="icon" type="image/png" href="static/logo.png"/>
+    <title>BANRDB Store Management System</title>
+
+</head>
+<body>
+    <div class="main-container">
+        <div>
+            <p class="login-instruction">Select your login role:</p>
+            <select id="roleSelect" class="role-select">
+                <option value="" disabled selected>Select Role</option>
+                <option value="cc">Contingent Commander</option>
+                <option value="clo">Chief Logistic Officer</option>
+                <option value="officer">Officer</option>
+                <option value="storeman">Storeman</option>
+                <option value="guest">Guest</option>
+                <option value="admin">Admin</option>
+            </select>
+            <button onclick="handlelogin(document.getElementById('roleSelect').value)">Login</button>
+        </div>
+
+    </div>
+    <script>
+        function handlelogin(role_type) {
+            if(role_type === 'storeman') {
+                sessionStorage.setItem('role_type', 'storeman');
+            }
+            else if (role_type === 'cc') {
+                sessionStorage.setItem('role_type', 'cc');
+            }
+            else if (role_type === 'officer') {
+                sessionStorage.setItem('role_type', 'officer');
+            }
+            else if (role_type === 'clo') {
+                sessionStorage.setItem('role_type', 'clo');
+            }
+            else if (role_type === 'guest') {
+                sessionStorage.setItem('role_type', 'guest');
+            }
+            else if (role_type === 'admin') {
+                sessionStorage.setItem('role_type', 'admin');
+            }
+            window.location.href = 'login.html';
+        }
+        window.addEventListener('DOMContentLoaded', () => {
+            sessionStorage.removeItem('baNumber');
+            sessionStorage.removeItem('role_type');
+        });
+
+    </script>
+</body>
+</html>

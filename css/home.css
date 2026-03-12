@@ -1,0 +1,132 @@
+:root {
+    --bg: #eef4f8;
+    --surface: #ffffff;
+    --surface-alt: #f7fafc;
+    --text: #153147;
+    --muted: #5d7388;
+    --line: #d7e1ea;
+    --primary: #0f6c7d;
+    --shadow: 0 20px 45px rgba(17, 45, 70, 0.12);
+}
+
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+html {
+    scroll-behavior: smooth;
+    font-size: clamp(14px, 1.5vw, 18px);
+}
+
+body {
+    min-height: 100vh;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
+    color: var(--text);
+    background:
+        radial-gradient(circle at top right, rgba(15, 108, 125, 0.12), transparent 30%),
+        linear-gradient(180deg, #f8fbfd 0%, var(--bg) 100%);
+    padding: 1rem;
+}
+
+.main-container {
+    width: min(540px, 100%);
+    padding: clamp(1.5rem, 4vw, 2.5rem);
+    border-radius: 24px;
+    border: 1px solid rgba(215, 225, 234, 0.95);
+    background: linear-gradient(180deg, rgba(255, 255, 255, 0.96), rgba(247, 250, 252, 0.96));
+    box-shadow: var(--shadow);
+    animation: slideUp 0.4s ease;
+}
+
+.main-container > div {
+    width: 100%;
+    display: flex;
+    flex-direction: column;
+    align-items: stretch;
+    justify-content: center;
+    gap: 0.95rem;
+}
+
+.login-instruction,
+.main-container p {
+    color: var(--muted);
+    text-align: center;
+    font-size: 1rem;
+    font-weight: 600;
+    margin-bottom: 0.25rem;
+}
+
+.role-select {
+    width: 100%;
+    border: 1px solid var(--line);
+    border-radius: 14px;
+    background: var(--surface-alt);
+    color: var(--text);
+    font: inherit;
+    padding: 0.9rem 1rem;
+    transition: border-color 0.2s ease, box-shadow 0.2s ease, background-color 0.2s ease;
+}
+
+.role-select:focus {
+    outline: none;
+    border-color: rgba(15, 108, 125, 0.65);
+    box-shadow: 0 0 0 4px rgba(15, 108, 125, 0.12);
+    background: var(--surface);
+}
+
+button {
+    border: 0;
+    border-radius: 14px;
+    padding: 0.9rem 1.1rem;
+    font: inherit;
+    font-weight: 700;
+    color: #fff;
+    background: linear-gradient(135deg, var(--primary), #17889b);
+    box-shadow: 0 12px 24px rgba(15, 108, 125, 0.2);
+    cursor: pointer;
+    transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+
+button:hover {
+    transform: translateY(-1px);
+}
+
+button:active {
+    transform: translateY(0);
+}
+
+@keyframes slideUp {
+    from {
+        opacity: 0;
+        transform: translateY(20px);
+    }
+
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+@media (max-width: 768px) {
+    .main-container {
+        border-radius: 20px;
+    }
+}
+
+@media (max-width: 480px) {
+    body {
+        padding: 0.75rem;
+    }
+
+    .main-container {
+        border-radius: 18px;
+        padding: 1.25rem;
+    }
+}
+
+

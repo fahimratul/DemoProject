@@ -1,0 +1,76 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="css/user_management.css">
+    <link rel="stylesheet" href="css/notification.css">
+    <script src ="https://unpkg.com/lucide@latest" ></script>
+    <link rel='icon' href='static/logo_small.png' type='image/x-icon' />
+    <title>User management</title>
+</head>
+<body>
+    <div id="notification-toast" class="notification-toast"></div>
+    <!-- Loading Overlay -->
+    <div id="loadingOverlay" class="loading-overlay">
+        <div class="spinner"></div>
+        <div class="loading-text">Loading user Data</div>
+        <div class="loading-subtext">Please wait...</div>
+    </div>
+
+    <h1>User Management</h1>
+
+    <div class="search-container">
+        <div class="button-action">
+            <div class="additem-btn" onclick="window.history.back()"><i data-lucide="Home"></i>Dashboard</div>
+            <div class="additem-btn"  onclick="adduser()" id="AddUserBtn"><i data-lucide="user-plus"></i>Add New User</div>
+            <div class="additem-btn" id="PendingUser" style="display: none;" >View Pending Approvals</div>
+
+        </div>
+        <div class="library-search-container">
+            <svg class="search-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path>
+            </svg>
+            <input type="text" id="searchInput" class="library-search-input" placeholder="Search User...">
+        </div>   
+    </div>
+
+    <table>
+        <thead>
+            <tr>
+                <th>serial</th>
+                <th>BA/Army Number</th>
+                <th>Rank</th>
+                <th>Name</th>
+                <th>Role</th>
+                <th>Actions</th>
+            </tr>
+        </thead>
+        <tbody id="itemTableBody">
+            <!-- Inventory items will be dynamically inserted here -->
+        </tbody>
+    </table>
+
+
+
+
+    <script>
+        lucide.createIcons();
+        function hideNotification() {
+            const toast = document.getElementById("notification-toast");
+            toast.classList.remove("show");
+        }
+        
+        function adduser() {
+            if(sessionStorage.getItem('role') === 'guest'){
+                alert('Guests are not authorized to add new users.');
+                return;
+            }
+            window.location.href = 'adduser.html';
+        }
+    </script>
+    <script type="module" src="js/user_management.js" defer></script>
+    
+</body> 
+
+</html>

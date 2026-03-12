@@ -1,0 +1,120 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="css/adduser.css">
+    <link rel="stylesheet" href="css/notification.css">
+    <link rel='icon' href='static/logo_small.png' type='image/x-icon' />
+    <title>Officer Signup</title>
+</head>
+<body>
+    <div id="notification-toast" class="notification-toast"></div>
+    <div class="add-user-container">
+        <div class="header">
+            <h1>Officer Signup</h1>
+            <button class="back-button" onclick="window.history.back()">
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <path d="M19 12H5M12 19l-7-7 7-7"/>
+                </svg>
+                Back
+            </button>
+        </div>
+        
+        <form id="add-user-form">
+            <div class="form-group">
+                <label for="ba-number">BA Number *</label>
+                <input type="number" id="ba-number" name="ba-number" placeholder="Enter BA number">
+            </div>
+            <div class="form-group">
+                <label for="rank">Select Rank *</label>
+                <select name="rank" id="rank" >
+                    <option value="">-- Select Rank --</option>
+                    <option value="lt">Lieutenant</option>
+                    <option value="capt">Captain</option>
+                    <option value="major">Major</option>
+                    <option value="ltcol">Lieutenant Colonel</option>
+<option value="Colonel">Colonel</option>
+<option value="Major General">Major General</option>
+<option value="Brigadier General">Brigadier General</option>
+
+                </select>
+            </div>
+            <div class="form-group">
+                <label for="name">Name *</label>
+                <input type="text" id="name" name="name" placeholder="Enter name" >
+            </div>
+
+            <div class="form-group pass">
+                <label for="password" class="form-label">Password *</label>
+                <input type="password" id="password" class="form-input" placeholder="Enter password" >
+                <button type="button" class="password-toggle" onclick="togglePassword('password')">
+                    <svg class="eye-icon" width="20" height="20" viewBox="0 0 24 24" fill="none"
+                        stroke="currentColor" stroke-width="2">
+                        <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"></path>
+                        <circle cx="12" cy="12" r="3"></circle>
+                    </svg>
+                </button>
+            </div>
+
+            <div class="form-group pass">
+                <label for="confirm-password" class="form-label">Confirm Password *</label>
+                <input type="password" id="confirm-password" class="form-input" placeholder="Confirm password">
+                <button type="button" class="password-toggle" onclick="togglePassword('confirm-password')">
+                    <svg class="eye-icon" width="20" height="20" viewBox="0 0 24 24" fill="none"
+                        stroke="currentColor" stroke-width="2">
+                        <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"></path>
+                        <circle cx="12" cy="12" r="3"></circle>
+                    </svg>
+                </button>
+            </div>
+
+            <div class="form-group">
+                <label for="role">Select Role *</label>
+                <select name="role" id="role" >
+                    <option value="">-- Select Role --</option>
+                    <option value="lo">Logistic Officer</option>
+                    <option value="so">Signal Officer</option>
+                    <option value="eo">Engineer Officer</option>
+                    <option value="mto"> Military Transport Officer</option>
+                    <option value="workshop">Workshop Officer</option>
+                    <option value="medical">Medical Officer</option>
+                    <option value="stationary">Adjutant</option>
+                    <option value="cimic">Cimic Officer</option>
+                    <option value="guest">Guest</option>
+                </select>
+            </div>
+
+            <div class="button-group">
+                <button type="submit" id="add-user-button" class="submit-button">
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <path d="M16 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"></path>
+                        <circle cx="8.5" cy="7" r="4"></circle>
+                        <line x1="20" y1="8" x2="20" y2="14"></line>
+                        <line x1="23" y1="11" x2="17" y2="11"></line>
+                    </svg>
+                    Sign Up
+                </button>
+                <button type="reset" class="reset-button">
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <path d="M3 12a9 9 0 0 1 9-9 9.75 9.75 0 0 1 6.74 2.74L21 8"></path>
+                        <path d="M21 3v5h-5"></path>
+                        <path d="M21 12a9 9 0 0 1-9 9 9.75 9.75 0 0 1-6.74-2.74L3 16"></path>
+                        <path d="M3 21v-5h5"></path>
+                    </svg>
+                    Reset
+                </button>
+            </div>
+        </form>
+    </div>
+
+    <script type="module" src="js/officersignup.js"></script>
+    <script>
+        function togglePassword(inputId) {
+            const passwordInput = document.getElementById(inputId);
+            const type = passwordInput.getAttribute('type') === 'password' ? 'text' : 'password';
+            passwordInput.setAttribute('type', type);
+        }
+    </script>
+</body>
+</html>

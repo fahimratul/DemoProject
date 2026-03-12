@@ -1,0 +1,318 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="css/offr.css">
+    <link rel="stylesheet" href="css/card.css">
+    <link rel="stylesheet" href="css/pendingitem.css">
+    <link rel="stylesheet" href="css/notification.css">
+    <link rel="stylesheet" href="css/adduser.css">
+    <link rel="stylesheet" href="css/piechart.css">
+    <script src ="https://unpkg.com/lucide@latest" ></script>
+    <link rel='icon' href='static/logo_small.png' type='image/x-icon' />
+    <title>Dashboard</title>
+</head>
+<body style="margin-top: 70px;">
+
+    <nav>
+        <ul>
+            <li><a href="clodashboard.html" class="active">Home</a></li>
+            <li><a href="user_management.html">User Management</a></li>
+            <li id="notification_menu" class="notification_menu"><a href="notifications.html">Notifications</a><span class="notification_count" id="notificationCount">.</span></li>
+            <li ><a href="#" onclick="popupmenu()"> User ▼ </a> </li>
+        </ul>
+    </nav>
+    <div id="notification-toast" class="notification-toast"></div>   
+    <!-- Loading Overlay -->
+    <div id="loadingOverlay" class="loading-overlay">
+        <div class="spinner"></div>
+        <div class="loading-text">Loading Database</div>
+        <div class="loading-subtext">Please wait...</div>
+    </div>
+
+    <h1 id="title"></h1>
+
+    <div class="topdown-container" id="userInfoContainer" style="display: none;">
+        <h3 id ="username"></h3>
+        <h4 id ="rank"></h4>
+        <h4 id ="banumber"></h4>
+        <button class="btn primary" id="changePasswordBtn" onclick="passwordChangeModal()">Change Info</button>
+        <button class="btn secondary" id="logoutButton" onclick="logout()">Logout</button>        
+    </div>
+    
+    <h2>Inventory Status Overview</h2>
+    <div class="dashboard-card clo" onclick="window.location.href='vehicle/mt_dashboard.html'">
+                <div class="card mt">
+                    <div class="card-icon">
+                        <i data-lucide="truck"></i>
+                    </div>
+                    <div class="card-info">
+                        <h2 id="totalVehicles">0</h2>
+                        <p>Total Vehicles</p>
+                    </div>
+                </div>
+                <div class="card mt">
+                    <div class="card-icon">
+                        <i data-lucide="truck-electric"></i>
+                    </div>
+                    <div class="card-info">
+                        <h2 id="ALRVehicles">0</h2>
+                        <p>A LR</p>
+                    </div>
+                </div>
+                <div class="card mt">
+                    <div class="card-icon">
+                        <i data-lucide="truck"></i>
+                    </div>
+                    <div class="card-info">
+                        <h2 id="ASRVehicles">0</h2>
+                        <p>A SR Vehicles</p>
+                    </div>
+                </div>
+                <div class="card mt">
+                    <div class="card-icon">
+                        <i data-lucide="wrench"></i>
+                    </div>
+                    <div class="card-info">
+                        <h2 id="inMaintenanceVehicles">0</h2>
+                        <p> In Maintenance</p>
+                    </div>
+                </div>
+
+                <div class="card mt">
+                    <div class="card-icon">
+                        <i data-lucide="wrench"></i>
+                    </div>
+                    <div class="card-info">
+                        <h2 id="groundedVehicles">0</h2>
+                        <p> Grounded </p>
+                    </div>
+                </div>
+            </div>    
+        <div class="dashboard-card">
+            <div class="card" onclick="window.location.href='ammo/ammodashboard.html'" style="cursor: pointer;">
+                <div class="card-icon">
+                    <img src="static/ammo.jpg" alt="Ammo Icon" style="width: 90px; height: 90px;">    
+                </div>
+                <div class="card-info">
+                    <h1>Ammunation</h1>
+                    <p>Click for more details</p>
+                </div>
+            </div>
+            <div class="card" onclick="window.location.href='arms/ammodashboard.html'" style="cursor: pointer;">
+                <div class="card-icon">
+                    <img src="static/arms.png" alt="arms Icon" style="width: 90px; height: 90px;">    
+                </div>
+                <div class="card-info">
+                    <h1>arms Inventory</h1>
+                    <p>Click for more details</p>
+                </div>
+            </div>
+            <div class="card" onclick="window.location.href='engr/officer_dashboard.html'" style="cursor: pointer;">
+                <div class="card-icon">
+                    <img src="static/engr.jpg" alt="Engr Icon" style="width: 90px; height: 90px;">    
+                </div>
+                <div class="card-info">
+                    <h1>Engineer Inventory</h1>
+                    <h2 id="engr">0</h2>
+                    <p>Total Items</p> 
+                </div>
+            </div>
+            <div class="card" onclick="window.location.href='signal/officer_so_dashboard.html'" style="cursor: pointer;">
+                <div class="card-icon">
+                    <img src="static/signal.jpg" alt="Signal Icon" style="width: 90px; height: 90px;">    
+                </div>
+                <div class="card-info">
+                    <h1>Signal Inventory</h1>
+                    <h2 id="sig">0</h2>
+                    <p>Total Items</p> 
+                </div>
+            </div>
+            <div class="card" onclick="window.location.href='mt/officer_dashboard.html'" style="cursor: pointer;">
+                <div class="card-icon"><img src="static/mt.png" alt="MT Icon" style="width: 90px; height: 90px;">    
+                </div>
+                <div class="card-info">
+                    <h1>Military Transport Inventory</h1>
+                    <h2 id="mt">0</h2>
+                    <p>Total Items</p> 
+                </div>
+            </div>
+            <div class="card" onclick="window.location.href='bknco/officer_dashboard.html'" style="cursor: pointer;">
+
+                <div class="card-icon">
+                    <img src="static/bknco.jpg" alt="BK NCO Icon" style="width: 90px; height: 90px;">    
+                </div>
+                <div class="card-info">
+                    <h1>BK NCO Inventory</h1>
+                    <h2 id="bknco">0</h2>
+                    <p>Total Items</p> 
+                </div>
+            </div>
+            <div class="card" onclick="window.location.href='bqms/officer_dashboard.html'" style="cursor: pointer;">        
+                <div class="card-icon">
+                    <img src="static/bqms.png" alt="BQMS Icon" style="width: 90px; height: 90px;">    
+                </div>
+                <div class="card-info">
+                    <h1>BQMS Inventory</h1>
+                    <h2 id="bqms">0</h2>
+                    <p>Total Items</p>
+                </div>
+            </div>
+            
+            <div class="card" onclick="window.location.href='workshop/officer_dashboard.html'" style="cursor: pointer;">        
+                <div class="card-icon">
+                    <img src="static/workshop.png" alt="Workshop Icon" style="width: 90px; height: 90px;">    
+                </div>
+                <div class="card-info">
+                    <h1>Workshop</h1>
+                    <h2 id="workshop">0</h2>
+                    <p>Total Items</p>
+                </div>
+            </div>
+            
+            <div class="card" onclick="window.location.href='medical/officer_dashboard.html'" style="cursor: pointer;">        
+                <div class="card-icon">
+                    <img src="static/medical.png" alt="Medical Icon" style="width: 90px; height: 90px;">    
+                </div>
+                <div class="card-info">
+                    <h1>Medical Inventory</h1>
+                    <h2 id="medical">0</h2>
+                    <p>Total Items</p>
+                </div>
+            </div>
+            
+            <div class="card" onclick="window.location.href='stationary/officer_dashboard.html'" style="cursor: pointer;">        
+                <div class="card-icon">
+                    <img src="static/stationary.png" alt="Stationary Icon" style="width: 90px; height: 90px;">    
+                </div>
+                <div class="card-info">
+                    <h1>Stationary Inventory</h1>
+                    <h2 id="stationary">0</h2>
+                    <p>Total Items</p>
+                </div>
+            </div>
+            
+            <div class="card" onclick="window.location.href='cimic/officer_dashboard.html'" style="cursor: pointer;">        
+                <div class="card-icon">
+                    <img src="static/cimic.png" alt="CIMIC Icon" style="width: 90px; height: 90px;">    
+                </div>
+                <div class="card-info">
+                    <h1>CIMIC Inventory</h1>
+                    <h2 id="cimic">0</h2>
+                    <p>Total Items</p>
+                </div>
+            </div>
+    </div>
+   
+
+ 
+    <div id="changePasswordModal" class="modal hidden">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2>Change Password</h2>
+                <button class="modal-close" onclick="closeModal()"  aria-label="Close">&times;</button>
+            </div>
+            <div class="modal-grid">
+                <div class="form-group">
+                    <label for="ba" class="form-label"> BA Number *</label>
+                    <input type="text" id="banumber" class="form-input" placeholder="Enter BA Number" >
+                </div>
+                <div class="form-group">
+                    <label for="name" class="form-label"> Name</label>
+                    <input type="text" id="name" class="form-input" placeholder="Enter name" >
+                </div>
+                <div class="form-group">
+                    <label for="rank" class="form-label"> Rank</label>
+                    <select id="rank" class="form-input">
+                        <option value="" disabled selected>Select rank</option>
+                        <option value="lt">Lieutenant</option>
+                        <option value="capt">Captain</option>
+                        <option value="major">Major</option>
+                        <option value="ltcol">Lieutenant Colonel</option>
+                        <option value="col">Colonel</option>
+                        <option value="brig">Brigadier General</option>
+                        <option value="majorgen">Major General</option>
+                    </select>
+                </div>
+                <div class="form-group pass">
+                    <label for="new-password" class="form-label">New Password *</label>
+                    <input type="password" id="new-password" class="form-input" placeholder="Enter password" >
+                    <button type="button" class="password-toggle" onclick="togglePassword('new-password')">
+                        <svg class="eye-icon" width="20" height="20" viewBox="0 0 24 24" fill="none"
+                            stroke="currentColor" stroke-width="2">
+                            <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"></path>
+                            <circle cx="12" cy="12" r="3"></circle>
+                        </svg>
+                    </button>
+                </div>
+                <div class="form-group pass">
+                    <label for="confirm-password" class="form-label">Confirm Password *</label>
+                    <input type="password" id="confirm-password" class="form-input" placeholder="Confirm password">
+                    <button type="button" class="password-toggle" onclick="togglePassword('confirm-password')">
+                        <svg class="eye-icon" width="20" height="20" viewBox="0 0 24 24" fill="none"
+                            stroke="currentColor" stroke-width="2">
+                            <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"></path>
+                            <circle cx="12" cy="12" r="3"></circle>
+                        </svg>
+                    </button>
+                </div>
+            </div>
+            <div class="modal-actions">
+                <button type="button" class="btn secondary" onclick="closeModal()">Cancel</button>
+                <button id="passwordChangeSubmitBtn" class="btn primary">Change Info</button>
+            </div>
+        </div>
+    </div>
+
+
+    <script>
+        lucide.createIcons();
+        function hideNotification() {
+            const toast = document.getElementById("notification-toast");
+            toast.classList.remove("show");
+        }
+        function OpenUserManagement(){
+            window.location.href = 'user_management.html';
+        }
+        function popupmenu() {
+            const userInfoContainer = document.getElementById('userInfoContainer');
+            if (userInfoContainer.style.display === 'none' || userInfoContainer.style.display === '') {
+                userInfoContainer.style.display = 'flex';
+            } else {
+                userInfoContainer.style.display = 'none';
+            }
+        }
+        function togglePassword(inputId) {
+            const passwordInput = document.getElementById(inputId);
+            const type = passwordInput.getAttribute('type') === 'password' ? 'text' : 'password';
+            passwordInput.setAttribute('type', type);
+        }
+
+        function closeModal() {
+            const changePasswordModal = document.getElementById('changePasswordModal'); 
+            changePasswordModal.classList.add('hidden');
+        }
+        function passwordChangeModal() {
+            const changePasswordModal = document.getElementById('changePasswordModal');
+            changePasswordModal.classList.remove('hidden');
+            const userInfoContainer = document.getElementById('userInfoContainer');
+            userInfoContainer.style.display = 'none';
+            console.log('Password Change Modal Opened');
+        }
+        function handleInventoryChange(dept) {
+            if (dept) {
+                loadinventory(dept);
+            }
+        }
+        function loadinventory(dept) {
+            window.location.href = `cloinventory.html`;
+            sessionStorage.setItem('dept', dept);
+        }
+    </script>
+
+    <script type="module" src="js/clodashboard.js" defer></script>
+
+</body> 
+
+</html>

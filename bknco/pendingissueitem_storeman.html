@@ -1,0 +1,74 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="../css/offr.css">
+    <link rel="stylesheet" href="../css/card.css">
+    <link rel="stylesheet" href="../css/notification.css">
+    <link rel="stylesheet" href="../css/adduser.css">
+    <link rel="stylesheet" href="../css/issueitem.css">
+    <script src ="https://unpkg.com/lucide@latest" ></script>
+    <link rel='icon' href='../static/logo_small.png' type='image/x-icon' />
+    <title>Pending Issue Items - Storeman</title>
+</head>
+<body>
+    <div id="notification-toast" class="notification-toast"></div>
+    
+    <div id="loadingOverlay" class="loading-overlay">
+        <div class="spinner"></div>
+        <div class="loading-text">Loading Items Data</div>
+        <div class="loading-subtext">Please wait...</div>
+    </div>
+
+
+    <div class="issue-container">
+        <a href="#" onclick="window.history.back()" class="back-link">
+            <i data-lucide="arrow-left"></i> Back to Dashboard
+        </a>
+        
+        <div class="page-header">
+            <h1>Issue Items</h1>
+            <p>Checks items and specify quantities to issue to personnel</p>
+        </div>
+
+        <div class="recipient-section">
+            <h3>
+                <i data-lucide="user"></i> Recipient Information
+            </h3>
+            <div class="recipient-form">
+                <div class="form-group">
+                    <label for="recipientLocation">Person/Location</label>
+                    <input type="text" id="recipientLocation" name="recipientLocation" disabled>
+                </div>
+                <div class="form-group">
+                    <label for="issuedate">Date</label>
+                    <input type="date" id="issuedate" name="date" disabled>
+                </div>
+            </div>
+        </div>
+
+        <div class="items-section">
+            <div id="itemsContainer">
+                <!-- Item rows will be added here dynamically -->
+            </div>
+        </div>
+
+        <div class="issue-actions">
+            <button class="btn-secondary" id="cancelRequestBtn">
+                <i data-lucide="trash-2"></i> Cancel Request
+            </button>
+        </div>
+    </div>
+
+    <script type="module" src="js/pendingissueitem_storeman.js" defer></script>
+    <script>
+        // Initialize Lucide icons
+        lucide.createIcons();
+        function hideNotificationToast() {
+            const toast = document.getElementById('notification-toast');
+            toast.classList.remove('show');
+        }
+    </script>
+</body>
+</html>

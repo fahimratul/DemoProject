@@ -1,0 +1,196 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+	<meta charset="UTF-8">
+	<meta name="viewport" content="width=device-width, initial-scale=1.0">
+	<title>Item History</title>
+	<link rel="preconnect" href="https://fonts.googleapis.com">
+	<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+	<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="../css/additem.css">
+    <link rel="stylesheet" href="../css/notification.css">
+    <link rel="stylesheet" href="../css/vehiclehistory.css">
+    <link rel='icon' href='../static/logo_small.png' type='image/x-icon' />
+    <title>Item Details</title>
+</head>
+<body>
+    <div id="notification-toast" class="notification-toast"></div>
+    <div id="loadingOverlay" class="loading-overlay">
+        <div class="spinner"></div>
+        <div class="loading-text">Loading Inventory Data</div>
+        <div class="loading-subtext">Please wait...</div>
+    </div>
+
+
+	<div class="shell">
+		<div class="card">
+			<div class="card-header">
+				<div class="title-row">
+					<div>
+						<h1 id="title">Details of Item</h1>
+					</div>
+					<div class="header-actions">
+						<button id="printBtn" class="print-button" title="Print Item Details">
+							<svg width="16" height="16" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+								<path d="M6 9V2H18V9" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+								<path d="M6 18H4C3.5 18 3 17.5 3 17V11C3 10.5 3.5 10 4 10H20C20.5 10 21 10.5 21 11V17C21 17.5 20.5 18 20 18H18" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+								<path d="M6 14H18V22H6V14Z" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+							</svg>
+							Print
+						</button>
+						<a class="back-link" onclick="window.history.back()">&#8592; Back to Dashboard</a>
+					</div>
+				</div>
+			</div>
+            <div class="card-body">
+                    <div class="info">
+                        <div class="info-group">
+                            <span class="info-label">Type of Item:</span>
+                            <span class="info-value" id="typeofitem"></span>
+                        </div>
+                        <div class="info-group">
+                            <span class="info-label">Measurement Unit:</span>
+                            <span class="info-value" id="unit"></span>
+                        </div>
+                        <div class="info-group">
+                            <span class="info-label">Authorized:</span>
+                            <span class="info-value" id="authorized"></span>
+                        </div>
+                        <div class="info-group">
+                            <span class="info-label">Held:</span>
+                            <span class="info-value" id="held"></span>
+                        </div>
+                        <div class="info-group">
+                            <span class="info-label">Issued:</span>
+                            <span class="info-value" id="issued"></span>
+                        </div>
+                        
+                        <div class="info-group">
+                            <span class="info-label">In store</span>
+                            <span class="info-value" id="instore"></span>
+                        </div>
+                        <div class="info-group">
+                            <span class="info-label">Serviceable:</span>
+                            <span class="info-value" id="servicable"></span>
+                        </div>
+                        <div class="info-group">
+                            <span class="info-label">Unserviceable:</span>
+                            <span class="info-value" id="unservicable"></span>
+                        </div>  
+                    </div>
+                    <div class="button">
+                        <button id="issueitem" class="maintainance-button" style="display: none;">Issue Item</button>
+                        <button id="markasunservicable" class="maintainance-button" style="display: none;">Mark as Unserviceable</button>
+                    </div>
+                    <div class="history-section">
+                        <h2>Issue History</h2>
+                        <table class="history-table">
+                            <thead> 
+                                <tr>
+                                    <th>Voucher No</th>
+                                    <th>Date</th>
+                                    <th>Person/Location</th>
+                                    <th>Quantity</th>
+                                    <th>Status</th>
+                                </tr>
+                            </thead>
+                            <tbody id="history-tbody">
+                                <!-- History records will be populated here -->
+                            </tbody>
+                        </table>
+                        <h2>Unserviceable History</h2>
+                        <table class="history-table">
+                            <thead>
+                                <tr>
+                                    <th>Voucher No</th>
+                                    <th>Date</th>
+                                    <th>Reasons</th>
+                                    <th>Quantity</th>
+                                    <th>Status</th>
+                                </tr>
+                            </thead>
+                            <tbody id="unsvc-history-tbody">
+                                <!-- History records will be populated here -->
+                            </tbody>
+                        </table>
+                    </div>
+            </div>
+		</div>
+	</div>
+
+    <div id="issueModal" class="modal hidden">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2>Issue Item</h2>
+                <button class="modal-close" id="issueModalCloseBtn" aria-label="Close">&times;</button>
+            </div>
+            <form id="issueForm" class="modal-form">
+                <div class="modal-grid">
+                    <div class="field">
+                        <label for="issuedate">Date</label>
+                        <input type="date" id="issuedate" name="date" required>
+                    </div>
+                    <div class="field">
+                        <label for="issueperson">Person/Unit</label>
+                        <input type="text" id="issueperson" name="person" required>
+                    </div>
+                    <div class="field" style="grid-column: span 2;">
+                        <label for="issuelocation">Location</label>
+                        <input type="text" id="issuelocation" name="location" required>
+                    </div>
+                    <div class="field">
+                        <label for="issuequantity">Quantity</label>
+                        <input type="number" id="issuequantity" name="quantity" required>
+                    </div>
+                </div>
+                <div class="modal-actions">
+                    <button type="button" class="btn secondary" id="cancelIssueBtn">Cancel</button>
+                    <button type="submit" class="btn primary">Submit</button>
+                </div>
+            </form>
+        </div>
+    </div> 
+
+
+    
+    <div id="unsvcModal" class="modal hidden">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2>Mark as Unserviceable</h2>
+                <button class="modal-close" id="unsvcModalCloseBtn" aria-label="Close">&times;</button>
+            </div>
+            <form id="unsvcForm" class="modal-form">
+                <div class="modal-grid">
+                    <div class="field">
+                        <label for="unsvcdate">Date</label>
+                        <input type="date" id="unsvcdate" name="date" required>
+                    </div>
+                    <div class="field">
+                        <label for="unsvcreason">Reasons</label>
+                        <input type="text" id="unsvcreason" name="event" required>
+                    </div>
+                    <div class="field">
+                        <label for="unsvcquantity">Quantity</label>
+                        <input type="number" id="unsvcquantity" name="quantity" required>
+                    </div>
+                </div>
+                <div class="modal-actions">
+                    <button type="button" class="btn secondary" id="cancelUnsvcBtn">Cancel</button>
+                    <button type="submit" class="btn primary">Submit</button>
+                </div>
+            </form>
+        </div>
+    </div> 
+
+
+
+    <!-- <script type="module" src="js/vehiclehistory.js" defer></script> -->
+    <script>
+        function hideNotification() {
+            const toast = document.getElementById("notification-toast");
+            toast.classList.remove("show");
+        }
+    </script>
+    <script type="module" src="js/itemdetails.js" defer></script>
+</body>
+</html>

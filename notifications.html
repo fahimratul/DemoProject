@@ -1,0 +1,150 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="css/offr.css">
+    <link rel="stylesheet" href="css/card.css">
+    <link rel="stylesheet" href="css/piechart.css">
+    <link rel="stylesheet" href="css/pendingitem.css">
+    <link rel="stylesheet" href="css/notification.css">
+    <link rel="stylesheet" href="css/adduser.css">
+    <script src ="https://unpkg.com/lucide@latest" ></script>
+    <link rel='icon' href='static/logo_small.png' type='image/x-icon' />
+    <title>Dashboard</title>
+</head>
+<body style="margin-top: 70px;">
+
+    <nav>
+        <ul>
+            <li><a href="clodashboard.html" >Home</a></li>
+            <li><a href="user_management.html" >User Management</a></li>
+            <li><a href="notifications.html" class="active">Notifications</a></li>
+            <li ><a href="#" onclick="popupmenu()"> User ▼ </a> </li>
+        </ul>
+    </nav>
+    <div id="notification-toast" class="notification-toast"></div>   
+    <!-- Loading Overlay -->
+    <div id="loadingOverlay" class="loading-overlay">
+        <div class="spinner"></div>
+        <div class="loading-text">Loading Database</div>
+        <div class="loading-subtext">Please wait...</div>
+    </div>
+
+    <h1 id="title"></h1>
+
+    <div class="topdown-container" id="userInfoContainer" style="display: none;">
+        <h3 id ="username"></h3>
+        <h4 id ="rank"></h4>
+        <h4 id ="banumber"></h4>
+        <button class="btn primary" id="changePasswordBtn" onclick="passwordChangeModal()">Change Password</button>
+        <button class="btn secondary" id="logoutButton" onclick="logout()">Logout</button>        
+    </div>
+    
+    <h2>Notifications</h2>
+    
+    <button class="delete-btn" id="clear_notifications">Clear all Notifications</button>
+     
+    <div id="officer_notification" class="officernotification clo"></div>
+
+
+ 
+    <div id="changePasswordModal" class="modal hidden">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2>Change Password</h2>
+                <button class="modal-close" onclick="closeModal()"  aria-label="Close">&times;</button>
+            </div>
+            <div class="modal-grid">
+                <div class="form-group pass">
+                    <label for="password" class="form-label"> Current Password *</label>
+                    <input type="password" id="password" class="form-input" placeholder="Enter password" >
+                    <button type="button" class="password-toggle" onclick="togglePassword('password')">
+                        <svg class="eye-icon" width="20" height="20" viewBox="0 0 24 24" fill="none"
+                            stroke="currentColor" stroke-width="2">
+                            <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"></path>
+                            <circle cx="12" cy="12" r="3"></circle>
+                        </svg>
+                    </button>
+                </div>
+                <div class="form-group pass">
+                    <label for="new-password" class="form-label">New Password *</label>
+                    <input type="password" id="new-password" class="form-input" placeholder="Enter password" >
+                    <button type="button" class="password-toggle" onclick="togglePassword('new-password')">
+                        <svg class="eye-icon" width="20" height="20" viewBox="0 0 24 24" fill="none"
+                            stroke="currentColor" stroke-width="2">
+                            <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"></path>
+                            <circle cx="12" cy="12" r="3"></circle>
+                        </svg>
+                    </button>
+                </div>
+                <div class="form-group pass">
+                    <label for="confirm-password" class="form-label">Confirm Password *</label>
+                    <input type="password" id="confirm-password" class="form-input" placeholder="Confirm password">
+                    <button type="button" class="password-toggle" onclick="togglePassword('confirm-password')">
+                        <svg class="eye-icon" width="20" height="20" viewBox="0 0 24 24" fill="none"
+                            stroke="currentColor" stroke-width="2">
+                            <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"></path>
+                            <circle cx="12" cy="12" r="3"></circle>
+                        </svg>
+                    </button>
+                </div>
+            </div>
+            <div class="modal-actions">
+                <button type="button" class="btn secondary" onclick="closeModal()">Cancel</button>
+                <button id="passwordChangeSubmitBtn" class="btn primary">Change Password</button>
+            </div>
+        </div>
+    </div>
+
+
+    <script>
+        lucide.createIcons();
+        function hideNotification() {
+            const toast = document.getElementById("notification-toast");
+            toast.classList.remove("show");
+        }
+        function OpenUserManagement(){
+            window.location.href = 'user_management.html';
+        }
+        function popupmenu() {
+            const userInfoContainer = document.getElementById('userInfoContainer');
+            if (userInfoContainer.style.display === 'none' || userInfoContainer.style.display === '') {
+                userInfoContainer.style.display = 'flex';
+            } else {
+                userInfoContainer.style.display = 'none';
+            }
+        }
+        function togglePassword(inputId) {
+            const passwordInput = document.getElementById(inputId);
+            const type = passwordInput.getAttribute('type') === 'password' ? 'text' : 'password';
+            passwordInput.setAttribute('type', type);
+        }
+
+        function closeModal() {
+            const changePasswordModal = document.getElementById('changePasswordModal'); 
+            changePasswordModal.classList.add('hidden');
+        }
+        function passwordChangeModal() {
+            const changePasswordModal = document.getElementById('changePasswordModal');
+            changePasswordModal.classList.remove('hidden');
+            const userInfoContainer = document.getElementById('userInfoContainer');
+            userInfoContainer.style.display = 'none';
+            console.log('Password Change Modal Opened');
+        }
+        function handleInventoryChange(dept) {
+            if (dept) {
+                loadinventory(dept);
+            }
+        }
+        function loadinventory(dept) {
+            window.location.href = `cloinventory.html`;
+            sessionStorage.setItem('dept', dept);
+        }
+    </script>
+
+    <script type="module" src="js/clonotifications.js"   defer></script>
+
+</body> 
+
+</html>

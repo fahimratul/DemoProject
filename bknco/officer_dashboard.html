@@ -1,0 +1,404 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="../css/offr.css">
+    <link rel="stylesheet" href="../css/card.css">
+    <link rel="stylesheet" href="../css/pendingitem.css">
+    <link rel="stylesheet" href="../css/notification.css">
+    <link rel="stylesheet" href="../css/adduser.css">
+    <link rel="stylesheet" href="../css/piechart.css">
+    <script src ="https://unpkg.com/lucide@latest" ></script>
+
+    <link rel='icon' href='../static/logo_small.png' type='image/x-icon' />
+    <title>Offr Inventory</title>
+</head>
+<body>
+    <div id="notification-toast" class="notification-toast"></div> 
+    <div id="fixednotification" class="fixednotification"></div>  
+    <div id ="returnnotification" class="returnnotification"></div>
+    <!-- Loading Overlay -->
+    <div id="loadingOverlay" class="loading-overlay">
+        <div class="spinner"></div>
+        <div class="loading-text">Loading Inventory Data</div>
+        <div class="loading-subtext">Please wait...</div>
+    </div>
+    
+    <nav id="notforclo">
+        <ul>
+            
+            <li><a href="../eodashboard.html">Home</a></li><li><a href="officer_dashboard.html" class="active">Inventory</a></li>
+            <li><a href="pendingIssue.html">Pending Issues Items Request</a></li>
+            <li><a href="pendingunsvc.html">Pending Unsvc Items Request</a></li>
+            <li><a href="../user_management.html">User Management</a></li>
+            <li ><a href="#" onclick="popupmenu()"> User ▼ </a> </li>
+        </ul>
+    </nav>
+    <nav id="forclo">
+        <ul>
+            <li><a href="../clodashboard.html" >Home</a></li>
+            <li><a href="../user_management.html">User Management</a></li>
+            <li><a href="../notifications.html">Notifications</a></li>
+        </ul>
+    </nav>
+    <h1 id="title"> BK NCO Inventory Management</h1>
+
+
+    <div class="topdown-container" id="userInfoContainer" style="display: none;">
+        <h3 id ="username"></h3>
+        <h4 id ="rank"></h4>
+        <h4 id ="banumber"></h4>
+        <button class="btn primary" id="changePasswordBtn" onclick="passwordChangeModal()">Change Password</button>
+        <button class="btn secondary" id="logoutButton" onclick="logout()">Logout</button>        
+    </div>
+
+    <div class="pendingitem" id="newpendingtotalitem">
+        <h2>Pending New Held of Items</h2>
+        <table class="pendingitemTable">
+        <thead>
+            <tr>
+                <th>serial</th>
+                <th>Nomenclature/Name</th>
+                <th>Measurement Unit</th>
+                <th>Authorized</th>
+                <th>Previous Held</th>
+                <th>Upcoming</th>
+                <th>Actions</th>
+            </tr>
+        </thead>
+        <tbody id="newitemtotalTableBody">
+            <!-- Inventory items will be dynamically inserted here -->
+        </tbody>
+        </table>
+    </div>
+    <!--pending new item-->
+    <div class="pendingitem" id="newpendingitem">
+        <h2>Pending New Items</h2>
+        <table class="pendingitemTable">
+        <thead>
+            <tr>
+                <th>serial</th>
+                <th>Nomenclature/Name</th>
+                <th>Authorized</th>
+                <th>Measurement Unit</th>
+                <th>Held</th>
+                <th>Issued</th>
+                <th>In store</th>
+                <th>Serviceable</th>
+                <th>Unserviceable</th>
+                <th>Actions</th>
+            </tr>
+        </thead>
+        <tbody id="newitemTableBody">
+            <!-- Inventory items will be dynamically inserted here -->
+        </tbody>
+        </table>
+    </div>
+    
+    <!--Dashboard Card-->
+    <div class="dashboard-card">
+        <div class="card">
+            <div class="card-icon">
+                <i data-lucide="box"></i>
+            </div>
+            <div class="card-info">
+                <h2 id="serial">0</h2>
+                <p>Total Type of Item</p>
+            </div>
+        </div>
+        <div class="card" id="totalItemsDiv">
+            <div class="card-icon">
+                <i data-lucide="box"></i>
+            </div>
+            <div class="card-info">
+                <h2 id="totalItems">0</h2>
+                <p>Total Items</p>
+            </div>
+        </div>
+        <div class="card">
+            <div class="card-icon">
+                <i data-lucide="check-circle"></i>
+            </div>
+            <div class="card-info">
+                <h2 id="servicableItems">0</h2>
+                <p>Serviceable Items</p>
+            </div>
+        </div>
+        <div class="card" id="unservicableitemsDiv">
+            <div class="card-icon">
+                <i data-lucide="x-circle"></i>
+            </div>
+            <div class="card-info">
+                <h2 id="unservicableItems">0</h2>
+                <p>Unserviceable Items</p>
+            </div>
+        </div>
+        <div class="card" id="issuedItemsDiv">
+            <div class="card-icon">
+                <i data-lucide="truck"></i>
+            </div>
+            <div class="card-info">
+                <h2 id="issuedItems">0</h2>
+                <p>Issued Items</p>
+            </div>
+        </div>
+        <div class="card">
+            <div class="card-icon">
+                <i data-lucide="archive"></i>
+            </div>
+            <div class="card-info">
+                <h2 id="inStoreItems">0</h2>
+                <p>In Store Items</p>
+            </div>
+        </div>
+            <div class="card" onclick="additem()" style="cursor: pointer;">
+                <div class="card-icon">
+                    <i data-lucide="plus-circle"></i>
+                </div>
+                <div class="card-info">
+                    <h2 id="addItems">Add Items</h2>
+                    <p></p>
+                </div>
+            </div>
+            <div class="card" id="issueItemBtn" style="cursor: pointer;">
+                <div class="card-icon">
+                    <i data-lucide="send"></i>
+                </div>
+                <div class="card-info">
+                    <h2 id="addItems">Issue Items</h2>
+                    <p></p>
+                </div>
+            </div>
+            <div class="card" onclick="window.location.href='unservicable.html'" style="cursor: pointer;" id="addunservicable">
+                <div class="card-icon">
+                    <i data-lucide="x-circle"></i>
+                </div>
+                <div class="card-info">
+                    <h2 id="addItems">Unserviceable Items</h2>
+                    <p></p>
+                </div>
+            </div>
+    </div>
+
+    <!-- Search and Add Item -->
+    <div class="filter-container">
+            <button class="filter-btn" id="filterIssued" title="Show only items with issue > 0">
+                <i data-lucide="arrow-up"></i> With Issues
+            </button>
+            <button class="filter-btn" id="filterUnserviceable" title="Show only items with unserviceable > 0">
+                <i data-lucide="x-circle"></i> With Unserviceable
+            </button>
+            <button class="filter-btn" id="clearFilters" title="Clear all filters">
+                <i data-lucide="filter-x"></i> Clear Filters
+            </button>
+        </div>
+        
+        <div class="filter-status">
+            <span id="filterStatus">Showing all items</span>
+        </div>
+    <div class="search-container">
+        <div class="library-search-container">
+            <svg class="search-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path>
+            </svg>
+            <input type="text" id="searchInput" class="library-search-input" placeholder="Search Item...">
+        </div>
+        <div class="pdf-buttons-container">
+            <button class="pdf-btn" id="printAllTable" title="Print entire table">
+                <i data-lucide="printer"></i> Print All
+            </button>
+            <button class="pdf-btn" id="printSelectedRows" title="Print selected rows" style="display: none;">
+                <i data-lucide="file-check"></i> Print Selected
+            </button>
+            <button class="pdf-btn" id="toggleSelectMode" title="Toggle row selection mode">
+                <i data-lucide="check-square"></i> Select Rows
+            </button>
+        </div>
+    </div>
+
+
+    <div class="tableshow">
+    <table>
+        <thead>
+            <tr>
+                <th class="select-column" id="selectColumnHeader" style="display: none;">
+                    <input type="checkbox" id="selectAll" title="Select all rows">
+                 <th>serial</th>
+               </th>
+                <th>Nomenclature/Name</th>
+                <th>Measurement Unit</th>
+                <th>Authorized</th>
+                <th>Held</th>
+                <th>Issued</th>
+                <th>In store</th>
+                <th>Serviceable</th>
+                <th>Unserviceable</th>
+                <th>Actions</th>
+            </tr>
+        </thead>
+        <tbody id="itemTableBody">
+            <!-- Inventory items will be dynamically inserted here -->
+        </tbody>
+    </table>
+        
+    </div>
+    <!-- Inventory Table -->
+
+
+    <!-- Edit Item Modal -->
+    <div id="editModal" class="modal hidden">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2>Edit Item</h2>
+                <button class="modal-close" id="modalCloseBtn" aria-label="Close">&times;</button>
+            </div>
+            <form id="editForm" class="modal-form">
+                <div class="modal-grid">
+                    <div class="field">
+                        <label for="editName">Nomenclature / Name</label>
+                        <input type="text" id="editName" name="name" required>
+                    </div>
+                    <div class="field">
+                        <label for="editAuthorized">Measurement Unit</label>
+                        <input type="text" id="editUnit" name="unit" required>
+                    </div>
+                    <div class="field">
+                        <label for="editMeasurementUnit">Authorized</label>
+                        <input type="text" id="editAuthorized" name="authorized" required>
+                    </div>
+                    <div class="field">
+                        <label for="editTotal">Held</label>
+                        <input type="number" id="editTotal" name="total" min="0" required>
+                    </div>
+                    <div class="field">
+                        <label for="deleteitem">To Delete this Item write 'CONFIRM'</label>
+                        <input type="text" id="deleteitem" name="deleteitem" placeholder="CONFIRM">
+                    </div>
+
+                </div>
+                <div class="modal-actions">
+                    <button type="button" class="btn secondary" id="cancelEditBtn">Cancel</button>
+                    <button type="submit" class="btn primary">Save</button>
+                    <button type="button" class="btn danger" id="deleteItemBtn">Delete</button>
+                </div>
+            </form>
+        </div>
+    </div>
+    <div id="changePasswordModal" class="modal hidden">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2>Change Password</h2>
+                <button class="modal-close" onclick="closeModal()"  aria-label="Close">&times;</button>
+            </div>
+            <div class="modal-grid">
+                <div class="form-group pass">
+                    <label for="password" class="form-label"> Current Password *</label>
+                    <input type="password" id="password" class="form-input" placeholder="Enter password" >
+                    <button type="button" class="password-toggle" onclick="togglePassword('password')">
+                        <svg class="eye-icon" width="20" height="20" viewBox="0 0 24 24" fill="none"
+                            stroke="currentColor" stroke-width="2">
+                            <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"></path>
+                            <circle cx="12" cy="12" r="3"></circle>
+                        </svg>
+                    </button>
+                </div>
+                <div class="form-group pass">
+                    <label for="new-password" class="form-label">New Password *</label>
+                    <input type="password" id="new-password" class="form-input" placeholder="Enter password" >
+                    <button type="button" class="password-toggle" onclick="togglePassword('new-password')">
+                        <svg class="eye-icon" width="20" height="20" viewBox="0 0 24 24" fill="none"
+                            stroke="currentColor" stroke-width="2">
+                            <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"></path>
+                            <circle cx="12" cy="12" r="3"></circle>
+                        </svg>
+                    </button>
+                </div>
+                <div class="form-group pass">
+                    <label for="confirm-password" class="form-label">Confirm Password *</label>
+                    <input type="password" id="confirm-password" class="form-input" placeholder="Confirm password">
+                    <button type="button" class="password-toggle" onclick="togglePassword('confirm-password')">
+                        <svg class="eye-icon" width="20" height="20" viewBox="0 0 24 24" fill="none"
+                            stroke="currentColor" stroke-width="2">
+                            <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"></path>
+                            <circle cx="12" cy="12" r="3"></circle>
+                        </svg>
+                    </button>
+                </div>
+            </div>
+            <div class="modal-actions">
+                <button type="button" class="btn secondary" onclick="closeModal()">Cancel</button>
+                <button id="passwordChangeSubmitBtn" class="btn primary">Change Password</button>
+            </div>
+        </div>
+    </div>
+
+
+    <script>
+        lucide.createIcons();
+
+        function hideNotification() {
+            const toast = document.getElementById("notification-toast");
+            toast.classList.remove("show");
+        }
+        function popupmenu() {
+            const userInfoContainer = document.getElementById('userInfoContainer');
+            if (userInfoContainer.style.display === 'none' || userInfoContainer.style.display === '') {
+                userInfoContainer.style.display = 'flex';
+            } else {
+                userInfoContainer.style.display = 'none';
+            }
+        }
+        function togglePassword(inputId) {
+            const passwordInput = document.getElementById(inputId);
+            const type = passwordInput.getAttribute('type') === 'password' ? 'text' : 'password';
+            passwordInput.setAttribute('type', type);
+        }
+
+        function closeModal() {
+            const changePasswordModal = document.getElementById('changePasswordModal'); 
+            changePasswordModal.classList.add('hidden');
+        }
+        function passwordChangeModal() {
+            const changePasswordModal = document.getElementById('changePasswordModal');
+            changePasswordModal.classList.remove('hidden');
+            const userInfoContainer = document.getElementById('userInfoContainer');
+            userInfoContainer.style.display = 'none';
+            console.log('Password Change Modal Opened');
+        }
+        window.addEventListener('DOMContentLoaded', () => {
+                const role=sessionStorage.getItem('role');
+                if(role==='clo' || role === 'cc' || role === 'guest'){
+                    document.getElementById('notforclo').style.display='none';
+                    document.getElementById('forclo').style.display='block';
+                } 
+                else {
+                    document.getElementById('forclo').style.display='none';
+                    document.getElementById('notforclo').style.display='block';
+                }
+
+                if(role === 'guest'){
+                    const addItemBtn = document.getElementById('addItems');
+                    const issueItemBtn = document.getElementById('issueItemBtn');
+                    const unservicableItemsDiv = document.getElementById('addunservicable');
+                    addItemBtn.parentElement.parentElement.style.display = 'none';
+                    issueItemBtn.style.display = 'none';
+                    unservicableItemsDiv.style.display = 'none';
+                }
+        });
+        function hidefixedNotification(notificationId){
+            const fixedNotification = document.getElementById(notificationId);
+            fixedNotification.style.display = 'none';
+        }
+        
+        function additem(){
+            sessionStorage.setItem('addItemFrom', 'bknco');
+            window.location.href='../additem.html';
+        }
+    </script>
+
+    <script type="module" src="js/officer.js" defer></script>
+
+</body> 
+
+</html>

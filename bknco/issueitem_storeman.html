@@ -1,0 +1,81 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="../css/offr.css">
+    <link rel="stylesheet" href="../css/card.css">
+    <link rel="stylesheet" href="../css/notification.css">
+    <link rel="stylesheet" href="../css/adduser.css">
+    <link rel="stylesheet" href="../css/issueitem.css">
+    <script src ="https://unpkg.com/lucide@latest" ></script>
+    <link rel='icon' href='../static/logo_small.png' type='image/x-icon' />
+    <title>Issue Items - Storeman</title>
+</head>
+<body>
+    <div id="notification-toast" class="notification-toast"></div>
+    
+    <div id="loadingOverlay" class="loading-overlay">
+        <div class="spinner"></div>
+        <div class="loading-text">Loading Items Data</div>
+        <div class="loading-subtext">Please wait...</div>
+    </div>
+
+    <div class="issue-container">
+        <a href="storeman_dashboard.html" class="back-link">
+            <i data-lucide="arrow-left"></i> Back to Dashboard
+        </a>
+        
+        <div class="page-header">
+            <h1>Issue Items</h1>
+            <p>Select items and specify quantities to issue to personnel</p>
+        </div>
+
+        <div class="recipient-section">
+            <h3>
+                <i data-lucide="user"></i> Recipient Information
+            </h3>
+            <div class="recipient-form">
+                <div class="form-group">
+                    <label for="recipientLocation">Person/Location</label>
+                    <input type="text" id="recipientLocation" name="recipientLocation" required>
+                </div>
+                <div class="form-group">
+                    <label for="issuedate">Date</label>
+                    <input type="date" id="issuedate" name="date" required>
+                </div>
+            </div>
+        </div>
+
+        <div class="items-section">
+            <div class="section-header">
+                <h3>
+                    <i data-lucide="package"></i> Items to Issue
+                </h3>
+                <button class="add-item-btn" id="addMoreItems">
+                    <i data-lucide="plus"></i> Add Item
+                </button>
+            </div>
+            
+            <div id="itemsContainer">
+                <!-- Item rows will be added here dynamically -->
+            </div>
+        </div>
+
+        <div class="issue-actions">
+            <button class="btn-primary" id="processIssue">
+                <i data-lucide="send"></i> Process Issue Request
+            </button>
+            <button class="btn-secondary" id="clearForm">
+                <i data-lucide="trash-2"></i> Clear Form
+            </button>
+        </div>
+    </div>
+
+    <script type="module" src="js/issueitem_storeman.js" defer></script>
+    <script>
+        // Initialize Lucide icons
+        lucide.createIcons();
+    </script>
+</body>
+</html>

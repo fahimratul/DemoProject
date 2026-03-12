@@ -1,0 +1,65 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="css/offr.css">
+    <link rel="stylesheet" href="css/card.css">
+    <link rel="stylesheet" href="css/pendingitem.css">
+    <link rel="stylesheet" href="css/notification.css">
+    <link rel="stylesheet" href="css/adduser.css">
+    <link rel="stylesheet" href="css/piechart.css">
+    <script src ="https://unpkg.com/lucide@latest" ></script>
+    <link rel='icon' href='static/logo_small.png' type='image/x-icon' />
+    <title>Dashboard</title>
+</head>
+<body style="margin-top: 70px;">
+
+    <h1>Welcome to BANDRDB Storemanagement System</h1> 
+        <div class="dashboard-card">
+            <div class="card" onclick="window.location.href='ammo/ammodashboard.html'" style="cursor: pointer;">
+                <div class="card-icon">
+                    <img src="static/ammo.jpg" alt="Ammo Icon" style="width: 90px; height: 90px;">    
+                </div>
+                <div class="card-info">
+                    <h1>Ammunation</h1>
+                    <p>Click for more details</p>
+                </div>
+            </div>
+            
+            <div class="card" onclick="window.location.href='arms/ammodashboard.html'" style="cursor: pointer;">        
+                <div class="card-icon">
+                    <img src="static/arms.png" alt="BQMS Icon" style="width: 90px; height: 90px;">    
+                </div>
+                <div class="card-info">
+                    <h1>Arms Inventory</h1>
+                    <p>Click to view inventory</p>
+                </div>
+            </div>
+            <div class="card" onclick="window.location.href='bqms/officer_dashboard.html'" style="cursor: pointer;">        
+                <div class="card-icon">
+                    <img src="static/bqms.png" alt="BQMS Icon" style="width: 90px; height: 90px;">    
+                </div>
+                <div class="card-info">
+                    <h1>BQMS Inventory</h1>
+                    <p>Click to view inventory</p>
+                </div>
+            </div>
+        </div>
+        <div>
+            <button onclick="logout()" class="additem-btn">log out</button>
+        </div>
+    <script>
+        lucide.createIcons();
+        function logout() {
+            // Clear session data (if using sessionStorage or localStorage)
+            sessionStorage.clear();
+            
+            // Redirect to the login page
+            window.location.href = 'index.html';
+        }
+    </script>
+
+</body> 
+
+</html>

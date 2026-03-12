@@ -1,0 +1,64 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+	<meta charset="UTF-8">
+	<meta name="viewport" content="width=device-width, initial-scale=1.0">
+	<title>Add Inventory Item</title>
+	<link rel="preconnect" href="https://fonts.googleapis.com">
+	<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+	<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="css/additem.css">
+    <link rel="stylesheet" href="css/notification.css">
+    <link rel='icon' href='static/logo_small.png' type='image/x-icon' />
+</head>
+<body>
+    <div id="notification-toast" class="notification-toast"></div>
+	<div class="shell">
+		<div class="card">
+			<div class="card-header">
+				<div class="title-row">
+					<div>
+						<h1>Add Inventory Item</h1>
+						<p class="subtitle">Add your new item with the quantities</p>
+					</div>
+					<a class="back-link" onclick="window.history.back()">&#8592; Back to Inventory</a>
+				</div>
+			</div>
+			<form id="addItemForm">
+				<div class="grid">
+					<div class="field name-field">
+						<label for="name">Nomenclature / Name</label>
+						<input id="name" name="name" type="text" placeholder="e.g., Utility Knife" required>
+                        <p class="inline-hint">Try to avoid / sign in name</p>
+					</div>
+					<div class="field">
+						<label for="authorized">Authorized</label>
+						<input id="authorized" name="authorized" type="number" value="0" required>
+					</div>
+					<div class="field">
+						<label for="unit">Measurement Unit</label>
+						<input id="unit" name="unit" type="text" placeholder="e.g., pcs, boxes, liters" required>
+						<p class="inline-hint">Enter the unit of measurement</p>	
+					</div>
+					<div class="field">
+						<label for="total">Total Items</label>
+						<input id="total" name="total" type="number" min="0" step="1" value="0" required>
+					</div>
+				</div>
+				<div class="actions">
+					<button type="button" class="btn secondary" onclick="window.history.back()">Cancel</button>
+					<button type="submit" class="btn primary">Save Item</button>
+				</div>
+			</form>
+		</div>
+	</div>
+
+    <script type="module" src="js/additem.js" defer></script>
+    <script>
+        function hideNotification() {
+            const toast = document.getElementById("notification-toast");
+            toast.classList.remove("show");
+        }
+    </script>
+</body>
+</html>

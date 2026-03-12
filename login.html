@@ -1,0 +1,87 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="css/login.css">
+    <link rel='icon' href='static/logo_small.png' type='image/x-icon' />
+    <title>Login</title>
+</head>
+<body>
+    <div id="notification-toast" class="notification-toast"></div>
+    <div class="login-container">
+        <h1 id="login-title"></h1>
+        <div class="form-group">
+            <label for="ba-number" id="ba-number-label">BA Number</label>
+            <input type="text" id="ba-number" name="ba-number" placeholder="Enter your BA number" required>
+        </div>
+        <div class="form-group pass">
+            <label for="password" class="form-label">Password</label>
+            <input type="password" id="password" class="form-input" placeholder="Enter your password" required>
+            <button type="button" class="password-toggle" onclick="togglePassword('password')">
+                <svg class="eye-icon" width="20" height="20" viewBox="0 0 24 24" fill="none"
+                    stroke="currentColor" stroke-width="2">
+                    <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"></path>
+                    <circle cx="12" cy="12" r="3"></circle>
+                </svg>
+            </button>
+        </div>
+        <div class="form-group remember-me">
+            <input type="checkbox" id="remember-me"><p> Remember me</p>
+        </div>
+        <button id="login-button">Login</button>
+        <p id="officer_signup" onclick="window.location.href='officer_signup.html'"  style="text-align: center;cursor:pointer; display: none;">Create Account</p>
+        <br>
+        <p onclick="window.location.href='index.html'" style="text-align: center;cursor:pointer">&larr; Go Back</p> 
+    </div>
+    <script type="module" src="js/connect.js" defer></script>
+    <script>
+        function togglePassword(inputId) {
+            const passwordInput = document.getElementById(inputId);
+            const type = passwordInput.getAttribute('type') === 'password' ? 'text' : 'password';
+            passwordInput.setAttribute('type', type);
+        }
+        function hideNotification() {
+            const toast = document.getElementById("notification-toast");
+            toast.classList.remove("show");
+        }
+        window.addEventListener('DOMContentLoaded', () => {
+            if (localStorage.getItem('baNumber') && localStorage.getItem('password')) {
+                document.getElementById('ba-number').value = localStorage.getItem('baNumber');
+                document.getElementById('password').value = localStorage.getItem('password');
+                document.getElementById('remember-me').checked = true;
+            }
+            const titleElement = document.getElementById('login-title');
+            const roletype=sessionStorage.getItem('role_type');
+            if (roletype ==='bqms') {
+                titleElement.textContent = 'Storeman Login';
+                document.getElementById('ba-number-label').textContent ='Army No';
+            } else if (roletype ==='officer') {
+                titleElement.textContent = 'Officer Login';
+                document.getElementById('officer_signup').style.display = 'block';
+            } 
+            else if (roletype ==='clo') {
+                titleElement.textContent = 'Welcome Cheif Logisitics Officer';
+                document.getElementById('ba-number-label').textContent ='Army No';
+            } 
+            else if (roletype ==='cc') {
+                titleElement.textContent = 'Welcome, Contigent Commander';
+            }
+            else if (roletype ==='admin') {
+                titleElement.textContent = 'Admin Login';
+            }
+            else if (roletype ==='guest') {
+                titleElement.textContent = 'Welcome, Guest';
+                sessionStorage.removeItem('role_type');
+                sessionStorage.setItem('role_type', 'clo');
+                document.getElementById('ba-number-label').textContent ='Army No';
+                document.getElementById('officer_signup').style.display = 'block';
+                console.log(roletype);
+            }
+            else {
+                titleElement.textContent = 'Login';
+            }
+        });
+    </script>
+</body>
+</html>

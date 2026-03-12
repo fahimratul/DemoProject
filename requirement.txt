@@ -1,0 +1,42 @@
+1. BQMS notification goes to Engg offr er kache,
+2. Bknco same,
+5. Ammo NCO role , 
+
+
+Officer> Enggr
+Enggr-Dashboard full revision, 
+ISSUE and Unsvc input a pointer hbe , 
+instore
+
+ektar item er jonno notification asche kintu baki item er jonno notification asche na
+
+totol item issue pasapasi thakbe 
+
+add item er jonno issue button thakbe, 
+    add item er approval jacche na,
+    authorized unit- drop down menu , eta sudu unit hbe
+
+vehicle er 
+
+send for maintaince e button a click korle auto print out ber hoye jabe,
+
+ammo update -> notification
+
+
+authorized unit -> drop down
+authorized:
+total - 
+instore, 
+
+location, 
+total item:                                                                         
+
+wk
+G/bi= held
+auth-
+instore- 
+issue-
+part 
+
+
+
