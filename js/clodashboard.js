@@ -46,17 +46,6 @@ window.addEventListener('DOMContentLoaded', () => {
     console.log('Logged in as BA Number:', userid);
 });
 
-let ranklist ={
-    lt:"Lieutenant",
-    capt:"Captain",
-    major:"Major",
-    ltcol:"Lieutenant Colonel",
-    col:"Colonel",
-    brig:"Brigadier",
-    majorgen:"Major General",
-    ltgen:"Lieutenant General",
-    gen:"General"
-};
 
 
 // Clear sessionStorage when the site is closed
@@ -65,12 +54,6 @@ const role = sessionStorage.getItem('role');
 
 
 window.addEventListener('DOMContentLoaded', () => {
-    const username=sessionStorage.getItem('username');
-    const rank=sessionStorage.getItem('rank');
-    const userid=sessionStorage.getItem('userid');
-    document.getElementById('username').textContent='Name: ' + username;
-    document.getElementById('rank').textContent=ranklist[rank] ? 'Rank: ' + ranklist[rank] : 'Rank: ' + rank;
-    document.getElementById('userid').textContent='BA Number: ' + userid;
     const titleElement = document.getElementById('title');
     if(role === 'cc'){
         
@@ -78,7 +61,7 @@ window.addEventListener('DOMContentLoaded', () => {
     }
     else if(role === 'clo'){
         
-        titleElement.textContent = 'Welcome , Cheif Logistic Officer';
+        titleElement.textContent = 'Welcome , Chief Logistic Officer';
     }
     else if(role === 'guest'){
         titleElement.textContent = 'Welcome, Guest';
@@ -99,41 +82,150 @@ console.log("Officer Script Loaded");
 
 
 
-function loaditemdata(type, path) {
-    let dbRef=ref(db, path);
-    const totalitemElement = document.getElementById(type);
-    let totalItemsCount = 0;
+// Per-store realtime listener handles (for cleanup when stores list changes)
+const storeItemListeners = {};
+
+/**
+ * Subscribes to the `stores/` node in Firebase.
+ * For each store entry it builds a card and subscribes to that store's
+ * inventory path so the item count updates in realtime.
+ *
+ * Expected Firebase structure for each store:
+ *   stores/{key}/name          — display name
+ *   stores/{key}/image         — image URL (optional)
+ *   stores/{key}/inventoryPath — DB path to count items (e.g. "engrinventory/main")
+ *   stores/{key}/link          — page to navigate on click (optional)
+ *   stores/{key}/order         — sort order (optional, default 999)
+ */
+function subscribeStores() {
+    const grid = document.getElementById('storesGrid');
+    const noStores = document.getElementById('noStores');
     const loadingOverlay = document.getElementById('loadingOverlay');
 
-    onValue(dbRef, (snapshot) => {
-        if (snapshot.exists()) {
-            totalItemsCount =snapshot.size;
-            totalitemElement.textContent = totalItemsCount;
-            console.log(`Total items in ${type} inventory:`, totalItemsCount);
-        } else {
-            totalitemElement.textContent = '0';
-            console.log(`No data available in ${type} inventory.`);
-        }   
-            
-        if (loadingOverlay) {
-            setTimeout(() => {
-                loadingOverlay.classList.add('hidden');
-            }, 100);
+    onValue(ref(db, 'stores'), (snapshot) => {
+        // Cancel any existing per-store item count listeners
+        Object.values(storeItemListeners).forEach(unsub => unsub());
+        Object.keys(storeItemListeners).forEach(k => delete storeItemListeners[k]);
+
+        grid.innerHTML = '';
+
+        if (!snapshot.exists()) {
+            noStores.style.display = 'block';
+            if (loadingOverlay) setTimeout(() => loadingOverlay.classList.add('hidden'), 200);
+            return;
         }
+
+        noStores.style.display = 'none';
+
+        const stores = snapshot.val();
+        const sorted = Object.entries(stores)
+            .sort(([, a], [, b]) => (a.order ?? 999) - (b.order ?? 999));
+        
+        
+        
+        sorted.forEach(([key, store]) => {
+            grid.appendChild(buildStoreCard(key, store));
+            storeItemListeners[key] = onValue(ref(db, `${store.code}/main/`), (snap) => {
+                    const el = document.getElementById(`store-count-${key}`);
+                    if (el) el.textContent = snap.exists() ? snap.size : '0';
+                });
+        });
+        console.log('Loaded stores:', sorted.map(([k, s]) => ({ key: k, ...s })));
+        if (loadingOverlay) setTimeout(() => loadingOverlay.classList.add('hidden'), 200);
     });
 }
 
+function resolveStoreImage(store) {
+    if (!store || typeof store !== 'object') {
+        return '';
+    }
 
+    // Keep parity with officer homepage image handling and support common variants.
+    return (
+        store.imageDataUrl ||
+        (store.image && store.image.dataUrl) ||
+        (store.image && store.image.url) ||
+        store.imageUrl ||
+        store.image ||
+        ''
+    );
+}
 
-loaditemdata('engr', 'engrinventory/main/');
-loaditemdata('sig', 'siginventory/main/');
-loaditemdata('mt', 'mtinventory/main/');
-loaditemdata('bknco', 'bkncoinventory/main/');
-loaditemdata('bqms', 'bqmsinventory/main/');
-loaditemdata('workshop', 'workshop/main/');
-loaditemdata('medical', 'medical/main/');
-loaditemdata('cimic', 'cimic/main/');
-loaditemdata('stationary', 'stationary/main/');
+function buildStoreCard(key, store) {
+    const card = document.createElement('article');
+    card.className = 'store-card';
+
+    const imageSource = resolveStoreImage(store);
+    let imageNode;
+
+    // Image section
+    if (imageSource) {
+        const img = document.createElement('img');
+        img.className = 'store-image';
+        img.src = imageSource;
+        img.alt = `${store.name || key} image`;
+        img.addEventListener('error', () => {
+            img.replaceWith(createImagePlaceholder());
+        });
+        imageNode = img;
+    } else {
+        imageNode = createImagePlaceholder();
+    }
+
+    // Body section
+    const body = document.createElement('div');
+    body.className = 'store-body';
+
+    const nameEl = document.createElement('h3');
+    nameEl.textContent = store.name || key;
+
+    const codeEl = document.createElement('p');
+    codeEl.className = 'store-meta';
+    codeEl.innerHTML = `<strong>Code:</strong> ${key}`;
+
+    const countDiv = document.createElement('p');
+    countDiv.className = 'store-meta';
+
+    const countNum = document.createElement('span');
+    countNum.className = 'store-count-num';
+    countNum.id = `store-count-${key}`;
+    countNum.textContent = store.inventoryPath ? '—' : 'N/A';
+
+    const countLabel = document.createElement('span');
+    countLabel.className = 'store-count-label';
+    countLabel.textContent = 'Total Items';
+
+    const countPrefix = document.createElement('strong');
+    countPrefix.textContent = 'Items: ';
+    countDiv.append(countPrefix, countNum, document.createTextNode(' '), countLabel);
+
+    const openBtn = document.createElement('button');
+    openBtn.type = 'button';
+    openBtn.className = 'open-btn';
+    openBtn.textContent = 'Open Inventory';
+    openBtn.addEventListener('click', () => { 
+            const storeCode = store.code || key;
+            const storeName = store.name || key;
+            sessionStorage.setItem("selected_store_code", storeCode);
+            sessionStorage.setItem("selected_store_name", storeName);
+            window.location.href = 'dashboard/officer_dashboard.html';
+    });
+    
+
+    body.append(nameEl, codeEl, countDiv, openBtn);
+    card.append(imageNode, body);
+
+    return card;
+}
+
+function createImagePlaceholder() {
+    const placeholder = document.createElement('div');
+    placeholder.className = 'store-image placeholder';
+    placeholder.textContent = 'No Image';
+    return placeholder;
+}
+
+subscribeStores();
 
 
 const logoutButton = document.getElementById('logoutButton');
@@ -169,95 +261,3 @@ document.getElementById('notification_menu').addEventListener('click', () => {
         });
     }
 });
-
-
-
-function loadvehicledata() {
-
-    const dbRef = ref(db, `vehiclelist/main/`);
-    const loadingOverlay = document.getElementById('loadingOverlay');
-    onValue(dbRef, (snapshot) => {
-        const data = snapshot.val();
-        let vehicleinfo = {
-            total: 0, alr: 0, asr: 0, inmaintenance: 0, grounded: 0 
-        };
-        if (data) {
-            for (const key in data) {
-                vehicleinfo.total += 1;
-                const vehicle = data[key];
-                switch (vehicle.condition) {
-                    case 'alr':
-                        vehicleinfo.alr += 1;
-                        break;
-                    case 'asr':
-                        vehicleinfo.asr += 1;
-                        break;
-                    case 'inmaintenance':
-                        vehicleinfo.inmaintenance += 1;
-                        break;
-                    case 'grounded':
-                        vehicleinfo.grounded += 1;
-                        break;
-                }
-            }
-        }
-        document.getElementById('totalVehicles').textContent = vehicleinfo.total;
-        document.getElementById('ALRVehicles').textContent = vehicleinfo.alr;
-        document.getElementById('ASRVehicles').textContent = vehicleinfo.asr;
-        document.getElementById('inMaintenanceVehicles').textContent = vehicleinfo.inmaintenance;
-        document.getElementById('groundedVehicles').textContent = vehicleinfo.grounded;
-        // Hide loading overlay after data is loaded
-        if (loadingOverlay) {
-            setTimeout(() => {
-            document.getElementById('loadingOverlay').classList.add('hidden');
-            }, 50);
-        }
-    });
-}
-
-
-loadvehicledata();
-
-document.getElementById('passwordChangeSubmitBtn').addEventListener('click', () => {
-    const newuserid = document.getElementById('userid').value.trim();
-    const newRank = document.getElementById('rank').value.trim();
-    const userid = sessionStorage.getItem('userid');
-    const name = document.getElementById('name').textContent;
-    if (!newuserid || !newRank) {
-        showNotification("BA Number and Rank cannot be empty.", "warning", "Input Error");
-        return;
-    }
-    const password = document.getElementById('new-password').value;
-    const confirmPassword = document.getElementById('confirm-password').value;
-    if (password !== confirmPassword) {
-        showNotification("Passwords do not match.", "error", "Input Error");
-        return;
-    }
-    remove(ref(db, `officers/${userid}`)).then(() => {
-        const newOfficerData = {
-            name: name,
-            rank: newRank,
-            userid: newuserid,
-            role_type: 'clo',
-            password: password
-        };
-        set(ref(db, `users/${newuserid}`), newOfficerData).then(() => {
-            sessionStorage.setItem('userid', newuserid);
-            sessionStorage.setItem('rank', newRank);
-            showNotification("Information updated successfully. Please log in again.", "success", "Update Successful");
-            setTimeout(() => {
-                window.location.href = 'index.html';
-            },1000);
-        }).catch((error) => {
-            console.error('Error updating information:', error);
-            showNotification("Failed to update information. Please try again.", "error", "Update Failed");
-        });
-    }).catch((error) => {
-        console.error('Error removing old information:', error);
-        showNotification("Failed to update information. Please try again.", "error", "Update Failed");
-    }
-    );
-});
-
-
-

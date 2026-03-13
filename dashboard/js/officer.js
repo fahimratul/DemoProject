@@ -52,33 +52,17 @@ window.addEventListener('DOMContentLoaded', () => {
     initializeIssueButton();
 });
 
-let ranklist ={
-    lt:"Lieutenant",
-    capt:"Captain",
-    major:"Major",
-    ltcol:"Lieutenant Colonel",
-    col:"Colonel",
-    brig:"Brigadier",
-    majorgen:"Major General",
-    ltgen:"Lieutenant General",
-    gen:"General"
-};
+
 
 
 // Clear sessionStorage when the site is closed
  
 const role = sessionStorage.getItem('role');
-
+const store = sessionStorage.getItem('selected_store_code');
+const role_type = sessionStorage.getItem('role_type');
+const selectedStoreName = sessionStorage.getItem('selected_store_name');
 
 window.addEventListener('DOMContentLoaded', () => {
-    const username=sessionStorage.getItem('username');
-    const rank=sessionStorage.getItem('rank');
-    const userid=sessionStorage.getItem('userid');
-    const selectedStoreName = sessionStorage.getItem('selected_store_name');
-    document.getElementById('username').textContent='Name: ' + username;
-    document.getElementById('rank').textContent=ranklist[rank] ? 'Rank: ' + ranklist[rank] : 'Rank: ' + rank;
-    sessionStorage.setItem('rank_proper', ranklist[rank] ? ranklist[rank] : rank);
-    document.getElementById('userid').textContent='BA Number: ' + userid;
     if (selectedStoreName) {
         const titleEl = document.getElementById('title');
         if (titleEl) {
@@ -112,7 +96,7 @@ const inputs = {
 
 function loaditemdata() {
      
-    let dbRef =ref(db, 'bkncoinventory/main/');
+    let dbRef =ref(db, `${store}/main/`);
 
     const loadingOverlay = document.getElementById('loadingOverlay');
 
@@ -211,13 +195,13 @@ function loaditemdata() {
                     }
                 }
                 else{
+                    const key = row.dataset.key;
                     if (e.target.classList.contains('edit-btn')) {
                         openEditModal(key);
                     }
                     if (e.target.classList.contains('row-select') || e.target.classList.contains('select-column')){
                         return;
                     }
-                    const key = row.dataset.key;
                     console.log("Row clicked for key:", key);
                     window.location.href = `itemdetails.html?key=${key}&type=engr`;    
                 }
@@ -254,7 +238,7 @@ function loaditemdata() {
 
 
 function pendingnewitemdata() {
-    let dbRef =ref(db, 'officerapproval/new/bkncoinventory/');
+    let dbRef =ref(db, `officerapproval/new/${store}/`);
     const newpendingitembody = document.getElementById('newpendingitem');
     const newitemTableBody = document.getElementById('newitemTableBody');
     onValue(dbRef, (snapshot) => {
@@ -322,7 +306,7 @@ function pendingnewitemdata() {
 } 
 
 function pendingnewtotalitemdata() {
-    let dbRef =ref(db, 'officerapproval/newtotal/bkncoinventory/');
+    let dbRef =ref(db, `officerapproval/newtotal/${store}/`);
     const newpendingtotalitem = document.getElementById('newpendingtotalitem');
     const newitemtotalTableBody = document.getElementById('newitemtotalTableBody');
 
@@ -391,7 +375,7 @@ function approveNewtotalItem(key) {
     const newinstore = currentItem.total - total;
     const newservicable = newinstore - (dataCache[key]?.unservicable || 0);
 
-    update(ref(db, 'bkncoinventory/main/' + key), {
+    update(ref(db, `${store}/main/${key}`), {
         name: currentItem.name || '',
         unit: currentItem.unit || '',
         authorized: currentItem.authorized || '',
@@ -400,7 +384,7 @@ function approveNewtotalItem(key) {
         servicable: newservicable
     }).then(() => {
         console.log('New total item approved and updated in inventory');
-        remove(ref(db, 'officerapproval/newtotal/bkncoinventory/' + key)).then(() => {
+        remove(ref(db, `officerapproval/newtotal/${store}/${key}`)).then(() => {
             console.log('New total item request removed from pending approvals');
             pendingnewtotalitemdata();
             loaditemdata();
@@ -427,7 +411,7 @@ function approveNewtotalItem(key) {
 
 
 function rejectNewtotalItem(key) {
-    remove(ref(db, 'officerapproval/newtotal/bkncoinventory/' + key)).then(() => {
+    remove(ref(db, `officerapproval/newtotal/${store}/${key}`)).then(() => {
         console.log('New total item request rejected and removed from pending approvals');
         pendingnewtotalitemdata();
         showNotification('New total inventory item request rejected successfully.', 'info', 'Item Rejected');
@@ -440,9 +424,9 @@ function rejectNewtotalItem(key) {
 function approveNewItem(key) {
     const newItem = newitemCache[key];
     if (!newItem) return;
-    set(ref(db, 'bkncoinventory/main/' + key), newItem).then(() => {
+    set(ref(db, `${store}/main/` + key), newItem).then(() => {
         console.log('New item approved and added to inventory');
-        remove(ref(db, 'officerapproval/new/bkncoinventory/' + key)).then(() => {
+        remove(ref(db, `officerapproval/new/${store}/` + key)).then(() => {
             console.log('New item request removed from pending approvals');
             pendingnewitemdata();
             loaditemdata();
@@ -466,7 +450,7 @@ function approveNewItem(key) {
 }
 
 function rejectNewItem(key) {
-    remove(ref(db, 'officerapproval/new/bkncoinventory/' + key)).then(() => {
+    remove(ref(db, `officerapproval/new/${store}/${key}`)).then(() => {
         console.log('New item request rejected and removed from pending approvals');
         pendingnewitemdata();
         showNotification('New inventory item request rejected successfully.', 'info', 'Item Rejected');
@@ -480,7 +464,7 @@ function newPendingItemNotification(){
     const fixedNotification = document.getElementById('fixednotification');
     fixedNotification.style.display = 'flex';
 
-    onValue(ref(db, 'issuepending/bknco/'), (snapshot) => {
+    onValue(ref(db, `issuepending/${store}/`), (snapshot) => {
         if(snapshot.exists()){
             let html = fixedNotification.innerHTML;
             const id = Date.now();
@@ -492,7 +476,7 @@ function newPendingItemNotification(){
         fixedNotification.innerHTML = html;
         }
     });
-    onValue(ref(db, 'issuepending/eo/'), (snapshot) => {
+    onValue(ref(db, `issuepending/${store}/`), (snapshot) => {
         if(snapshot.exists()){
             let html = fixedNotification.innerHTML;
             const id = Date.now();
@@ -504,37 +488,11 @@ function newPendingItemNotification(){
         fixedNotification.innerHTML = html;
         }
     });
-    onValue(ref(db, 'unservicable_storeman/bknco/'), (snapshot) => {
-        if(snapshot.exists()){
-            let html = fixedNotification.innerHTML;
-            const id = Date.now();
-            html += `<div class="notification-content" id="pending_${id}">
-            <p id="notificationMessage">You have a new <strong>Unserviceable</strong> item From BK NCO.</p>
-            <button class="notification-close" onclick="hidefixedNotification('pending_${id}')" aria-label="Close">&times;</button>
-            <button class="notification-view" id="viewPendingBtn" onclick="window.location.href='pendingunsvc.html'">View</button>
-        </div>`
-        fixedNotification.innerHTML = html;
-        }
-    });
-    onValue(ref(db, 'unservicable_storeman/eo/'), (snapshot) => {
-        if(snapshot.exists()){
-            let html = fixedNotification.innerHTML;
-            const id = Date.now();
-            html += `<div class="notification-content" id="pending_${id}">
-            <p id="notificationMessage">You have a new <strong>Unserviceable</strong> item From Engr Inventory.</p>
-            <button class="notification-close" onclick="hidefixedNotification('pending_${id}')" aria-label="Close">&times;</button>
-            <button class="notification-view" id="viewPendingBtn" onclick="window.location.href='./../engr/pendingunsvc.html'">View</button>
-        </div>`
-        fixedNotification.innerHTML = html;
-        }
-    });
-    
-
 }
 
 function loadreturnnotification(){
     const returnnotification = document.getElementById('returnnotification');
-    onValue(ref(db, 'notification/eo/'), (snapshot) => {
+    onValue(ref(db, `notification/${store}/`), (snapshot) => {
         const notificationData = snapshot.val();
         if(notificationData){
             let html = '';
@@ -555,7 +513,7 @@ function loadreturnnotification(){
     });
 }
 function acknowledgeNotification(key){
-    remove(ref(db, `notification/eo/${key}`)).then(() => {
+    remove(ref(db, `notification/${store}/${key}`)).then(() => {
         console.log('Notification acknowledged and removed.');
         document.getElementById(`notification_${key}`).remove();
     }).catch((error) => {
@@ -566,7 +524,7 @@ function acknowledgeNotification(key){
 window.acknowledgeNotification = acknowledgeNotification;
 
 
-if(role==='eo'){
+if(role_type ==='officer'){
     pendingnewitemdata();
     setTimeout(() => {
         pendingnewtotalitemdata();
@@ -653,11 +611,11 @@ function updateFilterButtonStates() {
     if (issueBtn) {
         if (activeFilters.showWithIssues) {
             issueBtn.classList.add('active');
-            issueBtn.style.backgroundColor = '#4CAF50';
+            issueBtn.style.background = '#4CAF50';
             issueBtn.style.color = 'white';
         } else {
             issueBtn.classList.remove('active');
-            issueBtn.style.backgroundColor = '';
+            issueBtn.style.background = '';
             issueBtn.style.color = '';
         }
     }
@@ -665,11 +623,11 @@ function updateFilterButtonStates() {
     if (unserviceableBtn) {
         if (activeFilters.showWithUnserviceable) {
             unserviceableBtn.classList.add('active');
-            unserviceableBtn.style.backgroundColor = '#f44336';
+            unserviceableBtn.style.background = '#f44336';
             unserviceableBtn.style.color = 'white';
         } else {
             unserviceableBtn.classList.remove('active');
-            unserviceableBtn.style.backgroundColor = '';
+            unserviceableBtn.style.background = '';
             unserviceableBtn.style.color = '';
         }
     }
@@ -806,7 +764,7 @@ editForm?.addEventListener('submit', (e) => {
         instore: newinstore,
         servicable: newservicable
     };
-    update(ref(db, 'bkncoinventory/main/' + currentEditKey), updated)
+    update(ref(db, `${store}/main/` + currentEditKey), updated)
         .then(() => {
             console.log('Data updated successfully');
             showNotification('Inventory item updated successfully.', 'success', 'Update Successful');
@@ -839,7 +797,7 @@ deleteItemBtn?.addEventListener('click', (e) => {
         return;
     }
     
-    remove(ref(db, 'bkncoinventory/main/' + currentEditKey))
+    remove(ref(db, `${store}/main/` + currentEditKey))
     .then(() => {
         console.log('Data deleted successfully');
         showNotification('Inventory item is pending for deletion.', 'success', 'Deletion Successful');
@@ -850,7 +808,7 @@ deleteItemBtn?.addEventListener('click', (e) => {
         showNotification('Error deleting item. Please try again.', 'error', 'Deletion Failed');
     });
     closeEditModal();
-    remove(ref(db, 'bkncoinventory/' + currentEditKey)).then(() => {
+    remove(ref(db, `${store}/` + currentEditKey)).then(() => {
         console.log('Item deleted from inventory');
     }).catch((error) => {
         console.error('Error deleting item from inventory:', error);
@@ -866,61 +824,6 @@ deleteItemBtn?.addEventListener('click', (e) => {
     });   
 });
 
-const logoutButton = document.getElementById('logoutButton');
-
-logoutButton?.addEventListener('click', () => {
-    sessionStorage.removeItem('userid');
-    sessionStorage.removeItem('role_type');
-    sessionStorage.removeItem('username');
-    sessionStorage.removeItem('rank');
-    window.location.href = './../index.html';
-});
-
-function changePassword() {
-    const userid = sessionStorage.getItem('userid');
-    if (!userid) {
-        console.error('BA Number not found in session storage.');
-        window.location.href = 'index.html';return;
-    }
-    const currentPassword = document.getElementById('password').value;
-    const newPassword = document.getElementById('new-password').value;    
-    const confirmPassword = document.getElementById('confirm-password').value;
-    if (newPassword !== confirmPassword) {
-        showNotification("New passwords do not match", "error", "Validation Error");
-        return;
-    }
-    if (newPassword.length < 6) {
-        showNotification("New password must be at least 6 characters long", "error", "Validation Error");
-        return;
-    }
-    const userRef = ref(db, 'users/' + userid);
-    get(userRef).then((snapshot) => {
-        const userData = snapshot.val();
-        if (userData) {
-            if (userData.password !== currentPassword) {
-                showNotification("Current password is incorrect", "error", "Validation Error");
-                return;
-            }
-            update(userRef, { password: newPassword })
-                .then(() => {
-                    showNotification("Password changed successfully", "success", "Success");
-                    sessionStorage.clear();
-                    window.location.href = '../index.html';
-                })
-                .catch((error) => {
-                    console.error("Error updating password:", error);
-                    showNotification("Error updating password", "error", "Update Failed");
-                });
-        } else {
-            showNotification("User data not found", "error", "Error");
-        }
-    }).catch((error) => {
-        console.error("Error fetching user data:", error);
-        showNotification("Error fetching user data", "error", "Error");
-    });
-}
-
-document.getElementById('passwordChangeSubmitBtn')?.addEventListener('click', changePassword);
 
 
 let isSelectionMode = false;
@@ -1262,7 +1165,7 @@ function printReport(tableRows, title, summaryData) {
         </head>
         <body>
             <div class="header">
-                <h1>BANRDB Store Management System</h1>
+                <h1>Store Management System</h1>
                 <h2>${title}</h2>
                 <p>Generated on ${currentDate}</p>
             </div>
@@ -1314,7 +1217,7 @@ function printReport(tableRows, title, summaryData) {
                 </tbody>
             </table>
             <div class="footer">
-                <p>BANRDB Store Management System - Engineering Inventory Report</p>
+                <p>Store Management System - ${selectedStoreName} Inventory Report</p>
                 <p>This report was generated automatically on ${currentDate}</p>
             </div>
             

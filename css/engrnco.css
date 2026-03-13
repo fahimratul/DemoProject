@@ -1,0 +1,112 @@
+* {
+    box-sizing: border-box;
+}
+
+.inventory-shell,
+.section,
+.table-shell,
+.tableshow {
+    width: min(1220px, calc(100% - 2rem));
+    margin: 1rem auto;
+}
+
+.section,
+.table-shell {
+    border-radius: 20px;
+    border: 1px solid rgba(215, 225, 234, 0.9);
+    background: rgba(255, 255, 255, 0.94);
+    box-shadow: 0 18px 40px rgba(17, 45, 70, 0.1);
+    padding: 1rem;
+}
+
+.section-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 0.8rem;
+    flex-wrap: wrap;
+    margin-bottom: 0.75rem;
+}
+
+.filter-container {
+    width: min(1220px, calc(100% - 2rem));
+    margin: 0 auto 0.8rem;
+    display: flex;
+    gap: 0.65rem;
+    flex-wrap: wrap;
+}
+
+.filter-status {
+    width: min(1220px, calc(100% - 2rem));
+    margin: 0 auto 0.65rem;
+    color: #5d7388;
+    font-weight: 600;
+}
+
+.filter-btn,
+.action-btn,
+.submit-button,
+.reset-button {
+    border: 0;
+    border-radius: 12px;
+    padding: 0.68rem 0.9rem;
+    font: inherit;
+    font-weight: 700;
+    cursor: pointer;
+}
+
+.filter-btn,
+.action-btn,
+.submit-button {
+    color: #fff;
+    background: linear-gradient(135deg, #0f6c7d, #17889b);
+}
+
+.reset-button {
+    color: #153147;
+    background: #e8eff4;
+}
+
+.inventory-table,
+.tableshow table {
+    width: 100%;
+    border-collapse: collapse;
+    border: 1px solid rgba(215, 225, 234, 0.9);
+    border-radius: 14px;
+    overflow: hidden;
+    background: #fff;
+}
+
+.inventory-table th,
+.inventory-table td,
+.tableshow th,
+.tableshow td {
+    text-align: left;
+    padding: 0.8rem 0.72rem;
+    border-bottom: 1px solid rgba(215, 225, 234, 0.85);
+}
+
+.inventory-table th,
+.tableshow th {
+    background: linear-gradient(180deg, #f6fafc 0%, #edf4f8 100%);
+    color: #5d7388;
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
+    font-size: 0.76rem;
+}
+
+.inventory-table tbody tr:hover,
+.tableshow tbody tr:hover {
+    background: rgba(15, 108, 125, 0.05);
+}
+
+@media (max-width: 760px) {
+    .inventory-shell,
+    .section,
+    .table-shell,
+    .tableshow,
+    .filter-container,
+    .filter-status {
+        width: calc(100% - 1rem);
+    }
+}

@@ -3,7 +3,6 @@ import { getAnalytics } from "https://www.gstatic.com/firebasejs/12.7.0/firebase
 
 import { getDatabase,set, get, ref, update , onValue} from "https://www.gstatic.com/firebasejs/12.7.0/firebase-database.js";
 
-
   const firebaseConfig = {
     apiKey: "AIzaSyBUis8E99I4feTN2D2Opivn1rwyZe7DmPU",
     authDomain: "fir-3842a.firebaseapp.com",
@@ -15,6 +14,7 @@ import { getDatabase,set, get, ref, update , onValue} from "https://www.gstatic.
     measurementId: "G-EEZ0XX89X5"
   };
 
+
 // Initialize Firebase
 const app = initializeApp(firebaseConfig);
 getAnalytics(app);
@@ -23,7 +23,12 @@ console.log(db);
 console.log("Firebase Initialized");
 let itemKey = null;
 let typeKey = null;
-let role = sessionStorage.getItem('role');
+
+const role = sessionStorage.getItem('role');
+const store = sessionStorage.getItem('selected_store_code');
+const role_type = sessionStorage.getItem('role_type');
+const selectedStoreName = sessionStorage.getItem('selected_store_name');
+
 
 window.addEventListener('DOMContentLoaded', () => {
     let userid = sessionStorage.getItem('userid');
@@ -45,13 +50,12 @@ function loaditemsdetails() {
     typeKey = urlparams.get('type');
     console.log('Item Key:', itemKey);
     console.log('Type Key:', typeKey);
-    let dbRef = ref(db, `bkncoinventory/main/`+ itemKey);
+    let dbRef = ref(db, `${store}/main/` + itemKey);
     const loadingOverlay = document.getElementById('loadingOverlay');
     onValue(dbRef, (snapshot) => {
         dataCache = snapshot.val();
         
         if (dataCache) {
-            console.log('Vehicle Data:', dataCache);
             document.getElementById('typeofitem').textContent = dataCache.name || 'N/A';
             document.getElementById('unit').textContent = dataCache.unit || 'N/A';
             document.getElementById('authorized').textContent = dataCache.authorized;
@@ -77,7 +81,7 @@ loaditemsdetails();
 
 let itemhistoryCache = {};
 function loaditemhistory() {
-    let dbRef = ref(db, `bkncoinventory/`+ itemKey + `/history`);
+    let dbRef = ref(db, `${store}/`+ itemKey + `/history`);
     const loadingOverlay = document.getElementById('loadingOverlay');
     onValue(dbRef, (snapshot) => {
         const data = snapshot.val();
@@ -136,7 +140,7 @@ loaditemhistory();
 loaditemhistory();
 let itemunsvccache = {};
 function loaditemunsvc() {
-    let dbRef = ref(db, `bkncoinventory/`+ itemKey + `/unsvc`);
+    let dbRef = ref(db, `${store}/`+ itemKey + `/unsvc`);
     const loadingOverlay = document.getElementById('loadingOverlay');
     onValue(dbRef, (snapshot) => {
         const data = snapshot.val();
@@ -208,7 +212,7 @@ function returnItemToStore(recordKey) {
     const newissue = (dataCache.issue || 0) - quantity;
     const newInstore = (dataCache.instore || 0) + quantity;
     let path;
-    path = `bkncoinventory/main/`+ itemKey;  
+    path = `${store}/main/` + itemKey;
     const updates = {};
     updates['issue'] = newissue;
     updates['instore'] = newInstore;
@@ -219,7 +223,7 @@ function returnItemToStore(recordKey) {
         console.error('Error returning item to store:', error);
         showNotification('Error returning item to store. Please try again.', 'error');
     });
-    path = `bkncoinventory/${itemKey}/history/${recordKey}`;
+    path = `${store}/${itemKey}/history/${recordKey}`;
     update(ref(db, path), { returned: true }).then(() => {
         console.log('History record updated successfully');
         showNotification('History record updated successfully', 'success');
@@ -228,17 +232,17 @@ function returnItemToStore(recordKey) {
         console.error('Error updating history record:', error);
     });
     set(ref(db, 'clo_cc_notification/'+Date.now()), {
-        from: 'BK NCO Inventory',
+        from: selectedStoreName,
         date: new Date().toLocaleString(),
         msg: `Item Returned to Store: ${dataCache.name}, Quantity: ${quantity}, From Location: ${record.location}`,
     });
     set(ref(db, 'clonotification'), true);
     loaditemhistory();
     loaditemsdetails();
-    if(role === 'bknco'){
-        const notificationPath = `notification/eo/${Date.now()}`;
+    if(role_type === 'storeman'){
+        const notificationPath = `notification/${store}/${Date.now()}`;
         set(ref(db, notificationPath), {
-            from: 'BK NCO Inventory',
+            from: selectedStoreName,
             date: new Date().toLocaleString(),
             msg: `Item Returned to Store: ${dataCache.name}, Quantity: ${quantity}, From Location: ${record.location}`,
         }).then(() => {
@@ -265,7 +269,7 @@ function markAsServiceable(recordKey) {
     const quantity = parseInt(record.quantity, 10);
     const newUnserviceable = (dataCache.unservicable || 0) - quantity;
     const newServiceable = (dataCache.servicable || 0) + quantity;
-    let dbRef = ref(db, `bkncoinventory/main/`+ itemKey);
+    let dbRef = ref(db, `${store}/main/`+ itemKey);
     const updates = {};
     updates['unservicable'] = newUnserviceable;
     updates['servicable'] = newServiceable;
@@ -276,7 +280,7 @@ function markAsServiceable(recordKey) {
         console.error('Error marking item as servicable:', error);
         showNotification('Error marking item as servicable. Please try again.', 'error');
     });
-    const path = `bkncoinventory/${itemKey}/unsvc/${recordKey}`;
+    const path = `${store}/${itemKey}/unsvc/${recordKey}`;
     update(ref(db, path), { markedsvc: true }).then(() => {
         console.log('Unserviceable history record updated successfully');
     })
@@ -284,7 +288,7 @@ function markAsServiceable(recordKey) {
         console.error('Error updating unservicable history record:', error);
     });
     set(ref(db, 'clo_cc_notification/'+Date.now()), {
-        from: 'BK NCO Inventory',
+        from: selectedStoreName,
         date: new Date().toLocaleString(),
         msg: `Item Marked as Serviceable: ${dataCache.name}, Quantity: ${quantity}`,
     });
@@ -293,10 +297,10 @@ function markAsServiceable(recordKey) {
     loaditemhistory();
     loaditemunsvc();
     loaditemsdetails();
-    if(role === 'bknco'){
-        const notificationPath = `notification/eo/${Date.now()}`;
+    if(role_type === 'storeman'){
+        const notificationPath = `notification/${store}/${Date.now()}`;
         set(ref(db, notificationPath), {
-            from: 'BK NCO Inventory',
+            from: selectedStoreName,
             date: new Date().toLocaleString(),
             msg: `Item Marked as Serviceable: ${dataCache.name}, Quantity: ${quantity}`,
         }).then(() => {

@@ -1,0 +1,142 @@
+.pendingitem,
+.pendingitems,
+.pending-section {
+    width: min(1220px, calc(100% - 2rem));
+    margin: 0 auto 1rem;
+    border-radius: 18px;
+    border: 1px solid rgba(215, 225, 234, 0.92);
+    background: rgba(255, 255, 255, 0.94);
+    box-shadow: 0 20px 45px rgba(17, 45, 70, 0.1);
+    padding: 1rem;
+}
+
+.pendingitem {
+    display: none;
+}
+
+.pendingitem h2,
+.pending-section h2 {
+    margin: 0 0 0.75rem;
+}
+
+.section-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 0.8rem;
+    margin-bottom: 0.75rem;
+    padding-bottom: 0.55rem;
+    border-bottom: 1px solid #dfe8ef;
+}
+
+.section-title {
+    margin: 0;
+}
+
+.section-icon {
+    width: 20px;
+    height: 20px;
+    color: #0f6c7d;
+}
+
+.pending-table {
+    width: 100%;
+    border-collapse: collapse;
+    overflow: hidden;
+    border-radius: 14px;
+    border: 1px solid rgba(215, 225, 234, 0.9);
+}
+
+.pending-table th,
+.pending-table td {
+    border-bottom: 1px solid rgba(215, 225, 234, 0.85);
+    text-align: left;
+    padding: 0.75rem;
+}
+
+.pending-table th {
+    background: linear-gradient(180deg, #f6fafc 0%, #edf4f8 100%);
+    color: #5d7388;
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
+    font-size: 0.76rem;
+}
+
+.pending-table tbody tr:hover {
+    background: rgba(15, 108, 125, 0.05);
+}
+
+.status-badge {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    min-width: 80px;
+    padding: 0.25rem 0.6rem;
+    border-radius: 999px;
+    font-size: 0.78rem;
+    font-weight: 700;
+}
+
+.status-pending {
+    background: #fff2cc;
+    color: #8a5a00;
+}
+
+.status-urgent {
+    background: #fde2e2;
+    color: #9f1d1d;
+}
+
+.status-new {
+    background: #d7f3ee;
+    color: #0f6c7d;
+}
+
+.status-update {
+    background: #e8eff4;
+    color: #3a5166;
+}
+
+.priority-high {
+    color: #b42318;
+    font-weight: 700;
+}
+
+.priority-medium {
+    color: #b76e00;
+    font-weight: 700;
+}
+
+.priority-low {
+    color: #1f8f5f;
+    font-weight: 700;
+}
+
+.action-buttons {
+    display: flex;
+    gap: 0.4rem;
+    flex-wrap: wrap;
+}
+
+.officernotification .msgbody {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 0.6rem;
+    flex-wrap: wrap;
+}
+
+.officernotification .msgbody > p {
+    margin: 0;
+    color: #153147;
+    font-weight: 600;
+}
+
+@media (max-width: 760px) {
+    .pendingitem,
+    .pendingitems,
+    .pending-section {
+        width: calc(100% - 1rem);
+        padding: 0.8rem;
+    }
+}

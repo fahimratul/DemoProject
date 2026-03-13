@@ -1,0 +1,59 @@
+.chart-container,
+.pie-chart-container,
+.chart-grid {
+    width: min(1220px, calc(100% - 2rem));
+    margin: 0 auto 1rem;
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+    gap: 1rem;
+}
+
+.pie-card,
+.chart-card,
+.pie-chart-card {
+    border: 1px solid rgba(215, 225, 234, 0.92);
+    border-radius: 18px;
+    background: rgba(255, 255, 255, 0.95);
+    box-shadow: 0 14px 30px rgba(17, 45, 70, 0.1);
+    padding: 1rem;
+}
+
+.pie-card h3,
+.chart-card h3,
+.pie-chart-card h3 {
+    margin: 0 0 0.7rem;
+    font-size: 1rem;
+}
+
+canvas {
+    max-width: 100%;
+}
+
+.chart-legend {
+    display: grid;
+    gap: 0.35rem;
+    margin-top: 0.65rem;
+    color: #5d7388;
+    font-size: 0.88rem;
+}
+
+.chart-legend-item {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.45rem;
+}
+
+.chart-legend-dot {
+    width: 10px;
+    height: 10px;
+    border-radius: 999px;
+    background: #0f6c7d;
+}
+
+@media (max-width: 760px) {
+    .chart-container,
+    .pie-chart-container,
+    .chart-grid {
+        width: calc(100% - 1rem);
+    }
+}
