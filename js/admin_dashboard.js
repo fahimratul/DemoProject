@@ -1,6 +1,6 @@
 import { initializeApp } from "https://www.gstatic.com/firebasejs/12.7.0/firebase-app.js";
 import { getAnalytics } from "https://www.gstatic.com/firebasejs/12.7.0/firebase-analytics.js";
-import { getDatabase, get, onValue, ref, set, update } from "https://www.gstatic.com/firebasejs/12.7.0/firebase-database.js";
+import { getDatabase, get, onValue, ref, set } from "https://www.gstatic.com/firebasejs/12.7.0/firebase-database.js";
 import { showNotification } from "./notification.js";
 
 const firebaseConfig = {
@@ -21,46 +21,10 @@ getAnalytics(app);
 const db = getDatabase(app);
 
 const state = {
-    users: [],
     stores: [],
     roles: [],
-    activeAssignType: "storeman",
-    pendingLoads: 3
+    pendingLoads: 2
 };
-
-function looksLikeUser(value) {
-    return Boolean(value) && typeof value === "object" && ("userid" in value || "baNumber" in value || "name" in value || "role" in value);
-}
-
-function flattenUsers(node, currentPath = "users") {
-    if (!node || typeof node !== "object") {
-        return [];
-    }
-
-    const users = [];
-
-    Object.entries(node).forEach(([key, value]) => {
-        const nextPath = `${currentPath}/${key}`;
-
-        if (looksLikeUser(value)) {
-            users.push({
-                key,
-                dbPath: nextPath,
-                userid: String(value.userid || value.baNumber || key),
-                name: value.name || "Unknown User",
-                role: value.role || "",
-                raw: value
-            });
-            return;
-        }
-
-        if (value && typeof value === "object") {
-            users.push(...flattenUsers(value, nextPath));
-        }
-    });
-
-    return users;
-}
 
 function normalizeStores(snapshotValue) {
     if (!snapshotValue || typeof snapshotValue !== "object") {
@@ -74,9 +38,7 @@ function normalizeStores(snapshotValue) {
         imageDataUrl: value?.imageDataUrl || value?.image?.dataUrl || "",
         image: value?.image || null,
         officerRole: value?.officerRole || "",
-        storemanRole: value?.storemanRole || "",
-        assignedOfficer: value?.assignedOfficer || null,
-        assignedStoreman: value?.assignedStoreman || null
+        storemanRole: value?.storemanRole || ""
     })).sort((left, right) => left.name.localeCompare(right.name));
 }
 
@@ -96,7 +58,8 @@ function normalizeRoles(snapshotValue) {
             roles.push({
                 key,
                 category,
-                name: value?.name || key
+                name: value?.name || key,
+                underCommand: value?.underCommand || {}
             });
         });
     });
@@ -147,15 +110,12 @@ function ensureAdminAccess() {
 }
 
 function updateStats() {
-    const totalUsers = state.users.length;
     const totalStores = state.stores.length;
     const totalRoles = state.roles.length;
 
-    const totalUsersEl = document.getElementById("totalUsers");
     const totalStoresEl = document.getElementById("totalStores");
     const totalRolesEl = document.getElementById("totalRoles");
 
-    if (totalUsersEl) totalUsersEl.textContent = String(totalUsers);
     if (totalStoresEl) totalStoresEl.textContent = String(totalStores);
     if (totalRolesEl) totalRolesEl.textContent = String(totalRoles);
 }
@@ -177,9 +137,6 @@ function renderStores() {
     }
 
     storesGrid.innerHTML = state.stores.map((store) => {
-        const officer = store.assignedOfficer;
-        const storeman = store.assignedStoreman;
-
         return `
             <article class="store-card">
                 <div class="store-card-header">
@@ -193,18 +150,12 @@ function renderStores() {
                 <div class="assignment-panel">
                     <div class="assignment-box">
                         <span>Officer</span>
-                        <strong>${officer ? `${officer.name} (${officer.userid})` : "Not assigned"}</strong>
-                        <div class="status-pill ${officer ? "" : "unassigned"}">${officer ? toLabel(officer.role) : (store.officerRole ? toLabel(store.officerRole) : "Pending")}</div>
+                        <div class="status-pill assigned">${toLabel(store.officerRole) || "Pending"} </div>
                     </div>
                     <div class="assignment-box">
                         <span>Storeman</span>
-                        <strong>${storeman ? `${storeman.name} (${storeman.userid})` : "Not assigned"}</strong>
-                        <div class="status-pill ${storeman ? "" : "unassigned"}">${storeman ? toLabel(storeman.role) : (store.storemanRole ? toLabel(store.storemanRole) : "Pending")}</div>
+                        <div class="status-pill assigned">${toLabel(store.storemanRole) || "Pending"}</div>
                     </div>
-                </div>
-                <div class="store-card-actions">
-                    <button class="store-action primary" type="button" onclick="openAssignModal('${store.code}', 'officer')">Assign Officer</button>
-                    <button class="store-action secondary" type="button" onclick="openAssignModal('${store.code}', 'storeman')">Assign Storeman</button>
                 </div>
             </article>
         `;
@@ -227,46 +178,25 @@ function renderRoles() {
         return;
     }
 
-    rolesList.innerHTML = state.roles.map((role) => `
-        <article class="role-card">
-            <div class="role-card-header">
-                <div>
-                    <h3>${role.name}</h3>
-                    <p class="role-key">${role.key}</p>
+    rolesList.innerHTML = state.roles.map((role) => {
+        const underCommandKeys = Object.keys(role.underCommand || {}).filter((key) => role.underCommand[key]);
+        const underCommandCount = underCommandKeys.length;
+
+        return `
+            <article class="role-card">
+                <div class="role-card-header">
+                    <div>
+                        <h3>${role.name}</h3>
+                        <p class="role-key">${role.key}</p>
+                    </div>
+                    <span class="role-category ${role.category}">${toLabel(role.category)}</span>
                 </div>
-                <span class="role-category ${role.category}">${toLabel(role.category)}</span>
-            </div>
-            <p class="role-description">This role is available under the ${toLabel(role.category)} category.</p>
-        </article>
-    `).join("");
-}
-
-function populateAssignUserOptions(type) {
-    const select = document.getElementById("assignUser");
-    const storeCode = document.getElementById("assignStoreCode")?.value || "";
-
-    if (!select) {
-        return;
-    }
-
-    const store = state.stores.find((entry) => entry.code === storeCode);
-    const expectedRole = type === "officer" ? (store?.officerRole || "") : (store?.storemanRole || "");
-
-    let eligibleUsers = state.users.filter((user) => {
-        if (type === "officer") {
-            return ["cc", "clo", "lo", "so", "eo", "mto", "workshop", "medical", "stationary", "cimic"].includes(user.role);
-        }
-
-        return ["signco", "engrnco", "bqms", "bknco", "mtnco", "mtjco", "ammonco", "workshopnco", "medicalnco", "stationarynco", "cimicnco"].includes(user.role);
-    });
-
-    if (expectedRole) {
-        eligibleUsers = eligibleUsers.filter((user) => user.role === expectedRole);
-    }
-
-    select.innerHTML = `<option value="">-- Select a user --</option>${eligibleUsers.map((user) => `
-        <option value="${user.userid}">${user.userid} - ${user.name} (${toLabel(user.role)})</option>
-    `).join("")}`;
+                <p class="role-description">This role is available under the ${toLabel(role.category)} category.</p>
+                ${role.category === "officer" ? `<p class="command-summary">Under Command: ${underCommandCount} storeman role(s)</p>` : ""}
+                ${role.category === "officer" ? `<div class="role-actions"><button class="store-action primary" type="button" onclick="openUnderCommandModal('${role.key}')">Add Under Command</button></div>` : ""}
+            </article>
+        `;
+    }).join("");
 }
 
 function openModal(modalId) {
@@ -323,16 +253,59 @@ function openCreateRoleModal() {
     openModal("createRoleModal");
 }
 
-function openAssignModal(storeCode, type = "storeman") {
-    state.activeAssignType = type;
+function openUnderCommandModal(officerRoleKey) {
+    const officerRole = state.roles.find((role) => role.category === "officer" && role.key === officerRoleKey);
+    const list = document.getElementById("underCommandRoleList");
+    const title = document.getElementById("underCommandTitle");
+    const hiddenKey = document.getElementById("underCommandOfficerKey");
 
-    document.getElementById("assignStoreCode").value = storeCode;
-    document.getElementById("assignType").value = type;
-    document.getElementById("assignModalTitle").textContent = `Assign ${type === "officer" ? "Officer" : "Storeman"}`;
+    if (!officerRole || !list || !title || !hiddenKey) {
+        return;
+    }
 
-    populateAssignUserOptions(type);
-    openModal("assignModal");
+    const selectedMap = officerRole.underCommand || {};
+    const storemanRoles = state.roles.filter((role) => role.category === "storeman");
+
+    title.textContent = `Under Command: ${officerRole.name}`;
+    hiddenKey.value = officerRoleKey;
+
+    if (!storemanRoles.length) {
+        list.innerHTML = `<p class="field-hint">No storeman roles available. Create storeman roles first.</p>`;
+        openModal("underCommandModal");
+        return;
+    }
+
+    list.innerHTML = storemanRoles.map((role) => `
+        <label class="under-command-item">
+            <input type="checkbox" value="${role.key}" ${selectedMap[role.key] ? "checked" : ""}>
+            <span>${role.name}</span>
+        </label>
+    `).join("");
+
+    openModal("underCommandModal");
 }
+
+async function saveUnderCommand() {
+    const officerRoleKey = document.getElementById("underCommandOfficerKey")?.value || "";
+    const list = document.getElementById("underCommandRoleList");
+
+    if (!officerRoleKey || !list) {
+        showNotification("Officer role is not selected.", "error", "Save Failed");
+        return;
+    }
+
+    const checked = Array.from(list.querySelectorAll("input[type='checkbox']:checked"));
+    const map = {};
+    checked.forEach((input) => {
+        map[input.value] = true;
+    });
+
+    await set(ref(db, `roles/officer/${officerRoleKey}/underCommand`), map);
+
+    closeModal("underCommandModal");
+    showNotification("Under command roles updated successfully.", "success", "Saved");
+}
+
 
 function sanitizeStoreCode(value) {
     return value.trim().toLowerCase().replace(/[^a-z0-9]+/g, "_").replace(/^_+|_+$/g, "");
@@ -433,8 +406,6 @@ async function createStore() {
         storemanRole,
         imageDataUrl,
         image: imageMeta,
-        assignedOfficer: null,
-        assignedStoreman: null,
         createdAt: new Date().toISOString()
     });
 
@@ -449,55 +420,10 @@ async function createStore() {
     showNotification("Store created successfully.", "success", "Store Created");
 }
 
-async function assignPersonnel() {
-    const assignType = document.getElementById("assignType")?.value || state.activeAssignType;
-    const userid = document.getElementById("assignUser")?.value || "";
-    const storeCode = document.getElementById("assignStoreCode")?.value || "";
-
-    if (!storeCode || !userid) {
-        showNotification("Select a user before assigning personnel.", "warning", "Validation Error");
-        return;
-    }
-
-    const user = state.users.find((entry) => entry.userid === userid);
-    if (!user) {
-        showNotification("Selected user could not be found.", "error", "Assignment Failed");
-        return;
-    }
-
-    const storeField = assignType === "officer" ? "assignedOfficer" : "assignedStoreman";
-
-    await update(ref(db, `stores/${storeCode}`), {
-        [storeField]: {
-            userid: user.userid,
-            name: user.name,
-            role: user.role
-        }
-    });
-
-    await update(ref(db, user.dbPath), {
-        store: storeCode
-    });
-
-    closeModal("assignModal");
-    showNotification(`${user.name} assigned successfully.`, "success", "Assignment Complete");
-}
-
-function subscribeUsers() {
-    onValue(ref(db, "users"), (snapshot) => {
-        state.users = flattenUsers(snapshot.val()).sort((left, right) => left.name.localeCompare(right.name));
-        updateStats();
-        hideLoadingOverlay();
-    }, (error) => {
-        console.error("Failed to load users", error);
-        showNotification("Failed to load users from the database.", "error", "Load Error");
-        hideLoadingOverlay();
-    });
-}
-
 function subscribeStores() {
     onValue(ref(db, "stores"), (snapshot) => {
         state.stores = normalizeStores(snapshot.val());
+        console.log(state.stores);
         renderStores();
         updateStats();
         hideLoadingOverlay();
@@ -522,11 +448,6 @@ function subscribeRoles() {
 }
 
 function bindEvents() {
-    document.getElementById("assignType")?.addEventListener("change", (event) => {
-        state.activeAssignType = event.target.value;
-        populateAssignUserOptions(state.activeAssignType);
-    });
-
     document.querySelectorAll(".modal-overlay").forEach((overlay) => {
         overlay.addEventListener("click", (event) => {
             if (event.target === overlay) {
@@ -564,7 +485,7 @@ function bindEvents() {
 
 window.openCreateStoreModal = openCreateStoreModal;
 window.openCreateRoleModal = openCreateRoleModal;
-window.openAssignModal = openAssignModal;
+window.openUnderCommandModal = openUnderCommandModal;
 window.closeModal = closeModal;
 window.createStore = async () => {
     try {
@@ -574,14 +495,7 @@ window.createStore = async () => {
         showNotification("Could not create the store. Please try again.", "error", "Store Error");
     }
 };
-window.assignPersonnel = async () => {
-    try {
-        await assignPersonnel();
-    } catch (error) {
-        console.error("Failed to assign personnel", error);
-        showNotification("Could not assign personnel. Please try again.", "error", "Assignment Error");
-    }
-};
+
 window.createRole = async () => {
     try {
         await createRole();
@@ -591,13 +505,21 @@ window.createRole = async () => {
     }
 };
 
+window.saveUnderCommand = async () => {
+    try {
+        await saveUnderCommand();
+    } catch (error) {
+        console.error("Failed to save under command", error);
+        showNotification("Could not save under command mapping. Please try again.", "error", "Save Error");
+    }
+};
+
 window.addEventListener("DOMContentLoaded", () => {
     if (!ensureAdminAccess()) {
         return;
     }
 
     bindEvents();
-    subscribeUsers();
     subscribeStores();
     subscribeRoles();
 
