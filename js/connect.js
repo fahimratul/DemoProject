@@ -87,7 +87,7 @@ function handlelogin() {
                     window.location.href = 'dashboard/storeman_dashboard.html';
                 }
                 else if (userData.role_type === 'officer') {
-                    window.location.href = 'dashboard/officer_dashboard.html';
+                    window.location.href = 'officer_homepage.html';
                 }
             } else {
                 console.log("Invalid password or role");

@@ -1,6 +1,6 @@
 import { initializeApp } from "https://www.gstatic.com/firebasejs/12.7.0/firebase-app.js";
 import { getAnalytics } from "https://www.gstatic.com/firebasejs/12.7.0/firebase-analytics.js";
-import { getDatabase, get, ref, remove, set } from "https://www.gstatic.com/firebasejs/12.7.0/firebase-database.js";
+import { getDatabase, onValue, ref, remove, set } from "https://www.gstatic.com/firebasejs/12.7.0/firebase-database.js";
 import { showNotification } from "./notification.js";
 
 const firebaseConfig = {
@@ -21,9 +21,12 @@ const db = getDatabase(app);
 
 const state = {
     mode: "all",
+    rawUsers: [],
+    rawPendingUsers: [],
     users: [],
     pendingUsers: [],
-    visibleRows: []
+    visibleRows: [],
+    underCommand: null
 };
 
 function escapeHtml(value) {
@@ -108,26 +111,117 @@ function flattenPendingNode(node, currentPath, sourceRoot, results) {
     });
 }
 
-function getUnderCommandRoles() {
+function extractUnderCommandRoles(rawData) {
+    const underCommandSet = new Set();
+    if (!rawData) {
+        return underCommandSet;
+    }
+
+    for (const key in rawData) {
+        underCommandSet.add(rawData[key]);
+    }
+
+    return underCommandSet;
+}
+
+function shouldIncludeUserForRole(user, underCommand) {
+    if (!user.userid || user.role === "cc" || user.role === "clo") {
+        return false;
+    }
+
+    if (!underCommand) {
+        return true;
+    }
+
+    return underCommand.has(user.role);
+}
+
+function shouldIncludePendingUserForRole(user, underCommand) {
+    if (!user.userid) {
+        return false;
+    }
+
+    if (!underCommand) {
+        return true;
+    }
+
+    return underCommand.has(user.role);
+}
+
+function recomputeAndRender() {
+    const underCommand = state.underCommand;
+
+    state.users = state.rawUsers
+        .filter((user) => shouldIncludeUserForRole(user, underCommand))
+        .sort((a, b) => a.name.localeCompare(b.name));
+
+    state.pendingUsers = state.rawPendingUsers
+        .filter((user) => shouldIncludePendingUserForRole(user, underCommand))
+        .sort((a, b) => a.name.localeCompare(b.name));
+
+    applySearchAndRender();
+}
+
+function subscribeToRealtimeData() {
     const role = sessionStorage.getItem("role");
+    const loadState = {
+        users: false,
+        approval: false,
+        underCommand: role === "admin" || role === "clo" || role === "cc"
+    };
 
-    if (role === "eo") {
-        return new Set(["engrnco", "bknco"]);
-    }
-    if (role === "so") {
-        return new Set(["signco"]);
-    }
-    if (role === "lo") {
-        return new Set(["bqms", "ammonco"]);
-    }
-    if (role === "mto") {
-        return new Set(["mtnco", "mtjco"]);
-    }
-    if (role === "workshop") {
-        return new Set(["workshopnco"]);
+    showLoading();
+
+    const markLoaded = (key) => {
+        if (loadState[key]) {
+            return;
+        }
+
+        loadState[key] = true;
+        if (Object.values(loadState).every(Boolean)) {
+            hideLoading();
+        }
+    };
+
+    onValue(ref(db, "users"), (snapshot) => {
+        state.rawUsers = flattenUsersNode(snapshot.val());
+        recomputeAndRender();
+        markLoaded("users");
+    }, (error) => {
+        console.error("Failed to subscribe users", error);
+        showNotification("Failed to load users in realtime.", "error", "Load Error");
+        markLoaded("users");
+    });
+
+    onValue(ref(db, "approval"), (snapshot) => {
+        const pending = [];
+        flattenPendingNode(snapshot.val(), "approval", "approval", pending);
+        state.rawPendingUsers = pending;
+        recomputeAndRender();
+        markLoaded("approval");
+    }, (error) => {
+        console.error("Failed to subscribe pending users", error);
+        showNotification("Failed to load pending users in realtime.", "error", "Load Error");
+        markLoaded("approval");
+    });
+
+    if (role === "admin" || role === "clo" || role === "cc") {
+        state.underCommand = null;
+        recomputeAndRender();
+        return;
     }
 
-    return null;
+    onValue(ref(db, `roles/officer/${role}/underCommand`), (snapshot) => {
+        state.underCommand = extractUnderCommandRoles(snapshot.val());
+        recomputeAndRender();
+        markLoaded("underCommand");
+    }, (error) => {
+        console.error("Failed to subscribe under command roles", error);
+        showNotification("Failed to load command roles in realtime.", "error", "Load Error");
+        state.underCommand = new Set();
+        recomputeAndRender();
+        markLoaded("underCommand");
+    });
 }
 
 function canViewPending() {
@@ -229,51 +323,13 @@ function applySearchAndRender() {
     renderRows(state.visibleRows, state.mode === "pending");
 }
 
-async function loadUsers() {
-    const snapshot = await get(ref(db, "users"));
-    const allUsers = flattenUsersNode(snapshot.val());
-    const underCommand = getUnderCommandRoles();
-
-    const filtered = allUsers.filter((user) => {
-        if (!user.userid || user.role === "cc" || user.role === "clo") {
-            return false;
-        }
-
-        if (!underCommand) {
-            return true;
-        }
-
-        return underCommand.has(user.role);
-    });
-
-    state.users = filtered.sort((a, b) => a.name.localeCompare(b.name));
-}
-
-async function loadPendingUsers() {
-    const pending = [];
-    const approvalSnapshot = await get(ref(db, "approval"));
-
-
-    flattenPendingNode(approvalSnapshot.val(), "approval", "approval", pending);
-
-    state.pendingUsers = pending
-        .filter((user) => Boolean(user.userid))
-        .sort((a, b) => a.name.localeCompare(b.name));
-}
-
 function getApprovalDestinationPath(pendingUser) {
-    if (pendingUser.sourceRoot === "approval") {
-        const normalizedCategory = (pendingUser.category || "").toLowerCase();
-        if (["admin", "cc", "clo", "officer", "storeman", "guest"].includes(normalizedCategory)) {
-            return `users/${normalizedCategory}/${pendingUser.userid}`;
-        }
-    }
-
     return `users/${pendingUser.userid}`;
 }
 
 async function approvePending(index) {
     const pendingUser = state.visibleRows[index];
+    console.log("Approving user:", pendingUser);
     if (!pendingUser) {
         return;
     }
@@ -293,8 +349,6 @@ async function approvePending(index) {
     await remove(ref(db, pendingUser.dbPath));
 
     showNotification("User approved successfully", "success", "Approved");
-    await loadPendingUsers();
-    applySearchAndRender();
 }
 
 async function rejectPending(index) {
@@ -310,9 +364,6 @@ async function rejectPending(index) {
 
     await remove(ref(db, pendingUser.dbPath));
     showNotification("User rejected successfully", "success", "Rejected");
-
-    await loadPendingUsers();
-    applySearchAndRender();
 }
 
 async function deleteUser(index) {
@@ -332,28 +383,6 @@ async function deleteUser(index) {
 
     await remove(ref(db, user.dbPath));
     showNotification("User deleted successfully", "success", "Deleted");
-
-    await loadUsers();
-    applySearchAndRender();
-}
-
-async function refreshCurrentMode() {
-    showLoading();
-
-    try {
-        if (state.mode === "pending") {
-            await loadPendingUsers();
-        } else {
-            await loadUsers();
-        }
-        applySearchAndRender();
-    } catch (error) {
-        console.error("Failed to refresh user data", error);
-        showNotification("Failed to load user data. Please refresh the page.", "error", "Load Error");
-        renderRows([], state.mode === "pending");
-    } finally {
-        hideLoading();
-    }
 }
 
 function bindEvents() {
@@ -365,14 +394,14 @@ function bindEvents() {
         pendingButton.style.display = "none";
     }
 
-    pendingButton?.addEventListener("click", async () => {
+    pendingButton?.addEventListener("click", () => {
         if (!canViewPending()) {
             return;
         }
 
         state.mode = state.mode === "all" ? "pending" : "all";
         pendingButton.textContent = state.mode === "pending" ? "View All Users" : "View Pending Approvals";
-        await refreshCurrentMode();
+        applySearchAndRender();
     });
 
     const tableBody = document.getElementById("itemTableBody");
@@ -412,5 +441,5 @@ window.addEventListener("DOMContentLoaded", async () => {
     // }
 
     bindEvents();
-    await refreshCurrentMode();
+    subscribeToRealtimeData();
 });

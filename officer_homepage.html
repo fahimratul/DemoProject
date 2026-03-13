@@ -1,0 +1,40 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="icon" type="image/png" href="static/logo_small.png">
+    <link rel="stylesheet" href="css/officer_homepage.css">
+    <link rel="stylesheet" href="css/notification.css">
+    <title>Officer Home</title>
+</head>
+<body>
+    <div id="notification-toast" class="notification-toast"></div>
+
+    <nav>
+        <ul>
+            <li><a class="active" href="officer_homepage.html">Home</a></li>
+            <li><a href="user_management.html">User Management</a></li>
+            <li><a href="profile.html">User</a></li>
+        </ul>
+    </nav>
+
+    <main class="page-wrap">
+        <section class="hero">
+            <p class="eyebrow">Officer Workspace</p>
+            <h1 id="welcomeTitle">Assigned Stores</h1>
+            <p class="subtitle">Choose a store to open its inventory dashboard.</p>
+        </section>
+
+        <section class="card-section">
+            <div class="section-title-row">
+                <h2>Your Assigned Stores</h2>
+                <span id="storeCount" class="badge">0</span>
+            </div>
+            <div id="storeGrid" class="store-grid"></div>
+        </section>
+    </main>
+
+    <script type="module" src="js/officer_homepage.js"></script>
+</body>
+</html>

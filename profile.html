@@ -1,0 +1,96 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="icon" type="image/png" href="static/logo_small.png">
+    <link rel="stylesheet" href="css/profile.css">
+    <link rel="stylesheet" href="css/notification.css">
+    <title>User Profile</title>
+</head>
+<body>
+    <div id="notification-toast" class="notification-toast"></div>
+
+    <main class="profile-page">
+        <header class="profile-header">
+            <div>
+                <p class="eyebrow">Account Center</p>
+                <h1>My Profile</h1>
+                <p class="subtitle">View your account, assigned stores, and under-command personnel.</p>
+            </div>
+            <div class="header-actions">
+                <button id="goBackBtn" class="btn ghost" type="button">Back</button>
+                <button id="logoutBtn" class="btn danger" type="button">Logout</button>
+            </div>
+        </header>
+
+        <section class="card" aria-labelledby="userInfoTitle">
+            <div class="card-title-row">
+                <h2 id="userInfoTitle">User Information</h2>
+                <span class="chip" id="roleTypeChip">Role Type</span>
+            </div>
+            <div class="grid two-col" id="userInfoGrid">
+                <div class="info-item">
+                    <span class="label">Name</span>
+                    <strong id="infoName">-</strong>
+                </div>
+                <div class="info-item">
+                    <span class="label">Rank</span>
+                    <strong id="infoRank">-</strong>
+                </div>
+                <div class="info-item">
+                    <span class="label">BA Number</span>
+                    <strong id="infoUserId">-</strong>
+                </div>
+                <div class="info-item">
+                    <span class="label">Role</span>
+                    <strong id="infoRole">-</strong>
+                </div>
+            </div>
+        </section>
+
+        <section class="card" aria-labelledby="passwordTitle">
+            <h2 id="passwordTitle">Change Password</h2>
+            <form id="passwordForm" class="password-form" novalidate>
+                <div class="field">
+                    <label for="currentPassword">Current Password</label>
+                    <input id="currentPassword" type="password" autocomplete="current-password" required>
+                </div>
+                <div class="field">
+                    <label for="newPassword">New Password</label>
+                    <input id="newPassword" type="password" autocomplete="new-password" required>
+                </div>
+                <div class="field">
+                    <label for="confirmPassword">Confirm New Password</label>
+                    <input id="confirmPassword" type="password" autocomplete="new-password" required>
+                </div>
+                <label class="toggle-row">
+                    <input id="showPasswords" type="checkbox">
+                    <span>Show passwords</span>
+                </label>
+                <button class="btn primary" type="submit">Update Password</button>
+            </form>
+        </section>
+
+        <section class="card" aria-labelledby="storesTitle">
+            <div class="card-title-row">
+                <h2 id="storesTitle">Assigned Store</h2>
+                <span class="chip" id="storeCountChip">0</span>
+            </div>
+            <div id="storeList" class="stack-list"></div>
+        </section>
+
+        <section class="card" aria-labelledby="underCommandTitle">
+            <div class="card-title-row">
+                <h2 id="underCommandTitle">Under Command</h2>
+                <span class="chip" id="underCommandCountChip">0</span>
+            </div>
+            <p id="underCommandHint" class="hint"></p>
+            <div id="underCommandRoleList" class="pill-list"></div>
+            <div id="underCommandUserList" class="stack-list"></div>
+        </section>
+    </main>
+
+    <script type="module" src="js/profile.js"></script>
+</body>
+</html>

@@ -74,10 +74,17 @@ window.addEventListener('DOMContentLoaded', () => {
     const username=sessionStorage.getItem('username');
     const rank=sessionStorage.getItem('rank');
     const userid=sessionStorage.getItem('userid');
+    const selectedStoreName = sessionStorage.getItem('selected_store_name');
     document.getElementById('username').textContent='Name: ' + username;
     document.getElementById('rank').textContent=ranklist[rank] ? 'Rank: ' + ranklist[rank] : 'Rank: ' + rank;
     sessionStorage.setItem('rank_proper', ranklist[rank] ? ranklist[rank] : rank);
     document.getElementById('userid').textContent='BA Number: ' + userid;
+    if (selectedStoreName) {
+        const titleEl = document.getElementById('title');
+        if (titleEl) {
+            titleEl.textContent = `${selectedStoreName} Inventory Management`;
+        }
+    }
 });
 
 

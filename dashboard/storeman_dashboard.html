@@ -3,12 +3,8 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <link rel="stylesheet" href="../css/offr.css">
-    <link rel="stylesheet" href="../css/card.css">
-    <link rel="stylesheet" href="../css/pendingitem.css">
+    <link rel="stylesheet" href="../css/officer_dashboard.css">
     <link rel="stylesheet" href="../css/notification.css">
-    <link rel="stylesheet" href="../css/adduser.css">
-    <link rel="stylesheet" href="../css/piechart.css">
     <script src ="https://unpkg.com/lucide@latest" ></script>
 
     <link rel='icon' href='../static/logo_small.png' type='image/x-icon' />
@@ -27,7 +23,7 @@
         <ul>
             <li><a href="storeman_dashboard.html" class="active">Dashboard</a></li>
             <li><a href="storeman_pending_overview.html">Pending Overview</a></li>
-            <li ><a href="#" onclick="popupmenu()"> User ▼ </a> </li>
+            <li ><a href="../profile.html"> User ▼ </a> </li>
         </ul>
     </nav>
     <h1 id="title">BK NCO Inventory Management</h1>
@@ -164,15 +160,14 @@
     </div>
 
 
-
-    <!-- Inventory Table -->
+    <div class="tableshow">
     <table>
         <thead>
             <tr>
                 <th class="select-column" id="selectColumnHeader" style="display: none;">
                     <input type="checkbox" id="selectAll" title="Select all rows">
-                </th>
-                <th>Serial No</th>
+                 <th>serial</th>
+               </th>
                 <th>Nomenclature/Name</th>
                 <th>Measurement Unit</th>
                 <th>Authorized</th>
@@ -188,6 +183,8 @@
             <!-- Inventory items will be dynamically inserted here -->
         </tbody>
     </table>
+        
+    </div>
 
     <!-- Edit Item Modal -->
     <div id="editModal" class="modal hidden">

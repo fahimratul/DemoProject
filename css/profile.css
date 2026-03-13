@@ -1,0 +1,266 @@
+:root {
+    --bg: #edf4f8;
+    --surface: #ffffff;
+    --surface-alt: #f6fafc;
+    --text: #153147;
+    --muted: #5d7388;
+    --line: #d7e1ea;
+    --primary: #0f6c7d;
+    --primary-dark: #0b5360;
+    --danger: #b42318;
+    --shadow: 0 20px 45px rgba(17, 45, 70, 0.12);
+}
+
+* {
+    box-sizing: border-box;
+}
+
+body {
+    margin: 0;
+    min-height: 100vh;
+    font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
+    color: var(--text);
+    background:
+        radial-gradient(circle at top right, rgba(15, 108, 125, 0.12), transparent 34%),
+        linear-gradient(180deg, #f8fbfd 0%, var(--bg) 100%);
+}
+
+.profile-page {
+    width: min(1080px, calc(100% - 2rem));
+    margin: 1.5rem auto 2rem;
+    display: grid;
+    gap: 1rem;
+}
+
+.profile-header {
+    display: flex;
+    justify-content: space-between;
+    gap: 1rem;
+    align-items: flex-start;
+    padding: 1.2rem;
+    border: 1px solid rgba(215, 225, 234, 0.9);
+    border-radius: 22px;
+    background: rgba(255, 255, 255, 0.95);
+    box-shadow: var(--shadow);
+}
+
+.eyebrow {
+    margin: 0;
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    color: var(--primary);
+    font-weight: 700;
+    font-size: 0.78rem;
+}
+
+.profile-header h1 {
+    margin: 0.35rem 0 0.25rem;
+    font-size: clamp(1.7rem, 3.8vw, 2.4rem);
+}
+
+.subtitle {
+    margin: 0;
+    color: var(--muted);
+}
+
+.header-actions {
+    display: flex;
+    gap: 0.6rem;
+    align-items: center;
+}
+
+.card {
+    border: 1px solid rgba(215, 225, 234, 0.95);
+    border-radius: 22px;
+    background: rgba(255, 255, 255, 0.93);
+    box-shadow: var(--shadow);
+    padding: 1rem;
+}
+
+.card h2 {
+    margin: 0 0 0.85rem;
+    font-size: 1.2rem;
+}
+
+.card-title-row {
+    display: flex;
+    justify-content: space-between;
+    gap: 1rem;
+    align-items: center;
+}
+
+.chip {
+    border-radius: 999px;
+    border: 1px solid var(--line);
+    background: var(--surface-alt);
+    color: var(--primary-dark);
+    font-weight: 700;
+    padding: 0.38rem 0.75rem;
+    font-size: 0.82rem;
+}
+
+.grid.two-col {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 0.85rem;
+}
+
+.info-item {
+    background: #f8fbfd;
+    border: 1px solid var(--line);
+    border-radius: 14px;
+    padding: 0.75rem;
+}
+
+.info-item .label {
+    display: block;
+    color: var(--muted);
+    font-size: 0.82rem;
+    margin-bottom: 0.24rem;
+}
+
+.password-form {
+    display: grid;
+    gap: 0.85rem;
+}
+
+.field {
+    display: grid;
+    gap: 0.45rem;
+}
+
+.field label {
+    font-weight: 600;
+}
+
+.field input {
+    width: 100%;
+    border: 1px solid var(--line);
+    border-radius: 12px;
+    background: var(--surface-alt);
+    color: var(--text);
+    font: inherit;
+    padding: 0.8rem 0.9rem;
+}
+
+.field input:focus {
+    outline: none;
+    border-color: rgba(15, 108, 125, 0.65);
+    box-shadow: 0 0 0 4px rgba(15, 108, 125, 0.12);
+    background: #fff;
+}
+
+.toggle-row {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.45rem;
+    color: var(--muted);
+}
+
+.btn {
+    border: 0;
+    border-radius: 12px;
+    cursor: pointer;
+    font-weight: 700;
+    font-size: 0.95rem;
+    padding: 0.75rem 1rem;
+    transition: transform 0.2s ease, box-shadow 0.2s ease, background 0.2s ease;
+}
+
+.btn:hover {
+    transform: translateY(-1px);
+}
+
+.btn.primary {
+    color: #fff;
+    background: linear-gradient(135deg, var(--primary), #4fb2c2);
+}
+
+.btn.primary:hover {
+    box-shadow: 0 10px 20px rgba(15, 108, 125, 0.25);
+}
+
+.btn.ghost {
+    color: var(--text);
+    border: 1px solid var(--line);
+    background: #fff;
+}
+
+.btn.danger {
+    color: #fff;
+    background: linear-gradient(135deg, #c6342e, var(--danger));
+}
+
+.stack-list {
+    display: grid;
+    gap: 0.7rem;
+}
+
+.list-card {
+    border: 1px solid var(--line);
+    border-radius: 14px;
+    background: #f9fcfe;
+    padding: 0.8rem;
+}
+
+.list-card h3 {
+    margin: 0 0 0.22rem;
+    font-size: 1.02rem;
+}
+
+.list-card p {
+    margin: 0.12rem 0;
+    color: var(--muted);
+}
+
+.hint {
+    margin: 0 0 0.7rem;
+    color: var(--muted);
+}
+
+.pill-list {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.45rem;
+    margin-bottom: 0.75rem;
+}
+
+.role-pill {
+    border-radius: 999px;
+    border: 1px solid rgba(15, 108, 125, 0.35);
+    color: var(--primary-dark);
+    background: rgba(79, 178, 194, 0.12);
+    padding: 0.33rem 0.65rem;
+    font-size: 0.82rem;
+    font-weight: 700;
+}
+
+.empty {
+    border: 1px dashed var(--line);
+    border-radius: 14px;
+    color: var(--muted);
+    background: #f8fbfd;
+    padding: 0.8rem;
+}
+
+@media (max-width: 760px) {
+    .profile-page {
+        width: min(1080px, calc(100% - 1rem));
+    }
+
+    .profile-header {
+        flex-direction: column;
+    }
+
+    .header-actions {
+        width: 100%;
+    }
+
+    .header-actions .btn {
+        flex: 1;
+    }
+
+    .grid.two-col {
+        grid-template-columns: 1fr;
+    }
+}

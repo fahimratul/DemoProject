@@ -297,7 +297,7 @@ async function saveUnderCommand() {
     const checked = Array.from(list.querySelectorAll("input[type='checkbox']:checked"));
     const map = {};
     checked.forEach((input) => {
-        map[input.value] = true;
+        map[input.value] = input.value;
     });
 
     await set(ref(db, `roles/officer/${officerRoleKey}/underCommand`), map);
