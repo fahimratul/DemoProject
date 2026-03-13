@@ -4,7 +4,6 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <link rel="stylesheet" href="css/user_management.css">
-    <link rel="stylesheet" href="css/notification.css">
     <script src ="https://unpkg.com/lucide@latest" ></script>
     <link rel='icon' href='static/logo_small.png' type='image/x-icon' />
     <title>User management</title>
@@ -23,8 +22,7 @@
     <div class="search-container">
         <div class="button-action">
             <div class="additem-btn" onclick="window.history.back()"><i data-lucide="Home"></i>Dashboard</div>
-            <div class="additem-btn"  onclick="adduser()" id="AddUserBtn"><i data-lucide="user-plus"></i>Add New User</div>
-            <div class="additem-btn" id="PendingUser" style="display: none;" >View Pending Approvals</div>
+            <div class="additem-btn" id="PendingUser">View Pending Approvals</div>
 
         </div>
         <div class="library-search-container">
@@ -59,14 +57,6 @@
         function hideNotification() {
             const toast = document.getElementById("notification-toast");
             toast.classList.remove("show");
-        }
-        
-        function adduser() {
-            if(sessionStorage.getItem('role') === 'guest'){
-                alert('Guests are not authorized to add new users.');
-                return;
-            }
-            window.location.href = 'adduser.html';
         }
     </script>
     <script type="module" src="js/user_management.js" defer></script>

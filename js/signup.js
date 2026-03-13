@@ -33,6 +33,37 @@ window.addEventListener('DOMContentLoaded', () => {
         return;
     }
     const roleSelect = document.getElementById('role');
+    
+    if(roletype === 'guest'){
+        const option = document.createElement('option');
+        option.value = 'guest';
+        option.textContent = 'Guest';
+        roleSelect.appendChild(option);
+        return;
+    }
+    if(roletype === 'admin'){
+        const option = document.createElement('option');
+        option.value = 'admin';
+        option.textContent = 'Admin';
+        roleSelect.appendChild(option);
+        return;
+    }
+    if(roletype === 'clo'){
+        const option = document.createElement('option');
+        option.value = 'clo';
+        option.textContent = 'Chief Logistic Officer';
+        roleSelect.appendChild(option);
+        return;
+    }
+    if(roletype === 'cc'){
+        const option = document.createElement('option');
+        option.value = 'cc';
+        option.textContent = 'Commanding Officer';
+        roleSelect.appendChild(option);
+        return;
+    }
+
+    
     const dbRef = ref(db, 'roles/' + roletype);
     get(dbRef).then((snapshot) => {
         if (snapshot.exists()) {
@@ -41,7 +72,7 @@ window.addEventListener('DOMContentLoaded', () => {
                 if (roles.hasOwnProperty(key)) {
                     const option = document.createElement('option');
                     option.value = key;
-                    option.textContent = roles[key];
+                    option.textContent = roles[key].name;
                     roleSelect.appendChild(option);
                 }
             }
@@ -96,12 +127,14 @@ addUserForm.addEventListener('submit', async (e) => {
             showNotification("User with this BA Number already exists", "error", "User Exists");
             return;
         }
-        set(ref(db, 'approval/' + role_type + '/' + userid), {
+        set(ref(db, 'approval/' + userid), {
             userid: userid,
             name: name,
             rank: rank,
             password: password,
-            role: role
+            role: role,
+            role_type: role_type,
+            createdAt: new Date().toISOString()
         });
         console.log("User added to CLO approval queue:", userid);
         showNotification("Account created successfully and pending approval", "success", "Success");

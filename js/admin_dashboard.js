@@ -14,68 +14,22 @@ const firebaseConfig = {
     measurementId: "G-EEZ0XX89X5"
 };
 
+const MAX_STORE_IMAGE_BYTES = 40 * 1024;
+
 const app = initializeApp(firebaseConfig);
 getAnalytics(app);
 const db = getDatabase(app);
 
-const rankLabels = {
-    snk: "Sainik",
-    lcpl: "Lance Corporal",
-    cpl: "Corporal",
-    sgt: "Sergeant",
-    wo: "Warrant Officer",
-    swo: "Senior Warrant Officer",
-    mwo: "Master Warrant Officer",
-    lt: "Lieutenant",
-    capt: "Captain",
-    major: "Major",
-    ltcol: "Lieutenant Colonel",
-    col: "Colonel",
-    brig: "Brigadier",
-    majorgen: "Major General",
-    ltgen: "Lieutenant General",
-    gen: "General"
-};
-
-const roleLabels = {
-    admin: "Admin",
-    cc: "Contingent Commander",
-    clo: "Chief Logistics Officer",
-    lo: "Logistics Officer",
-    so: "Signal Officer",
-    eo: "Engineer Officer",
-    mto: "Military Transport Officer",
-    workshop: "Workshop Officer",
-    medical: "Medical Officer",
-    stationary: "Adjutant",
-    cimic: "Cimic Officer",
-    guest: "Guest",
-    signco: "Storeman (Signal)",
-    engrnco: "Storeman (Engineer)",
-    bqms: "BQMS",
-    bknco: "Barrack NCO",
-    mtnco: "MT NCO",
-    mtjco: "MT JCO",
-    ammonco: "Ammo NCO",
-    workshopnco: "Workshop NCO",
-    medicalnco: "Storeman (Medical)",
-    stationarynco: "Storeman (Stationary)",
-    cimicnco: "Storeman (Cimic)"
-};
-
-const officerRoles = new Set(["cc", "clo", "lo", "so", "eo", "mto", "workshop", "medical", "stationary", "cimic"]);
-const storemanRoles = new Set(["signco", "engrnco", "bqms", "bknco", "mtnco", "mtjco", "ammonco", "workshopnco", "medicalnco", "stationarynco", "cimicnco"]);
-
 const state = {
     users: [],
-    filteredUsers: [],
     stores: [],
+    roles: [],
     activeAssignType: "storeman",
-    pendingLoads: 2
+    pendingLoads: 3
 };
 
 function looksLikeUser(value) {
-    return Boolean(value) && typeof value === "object" && ("userid" in value || "name" in value || "role" in value);
+    return Boolean(value) && typeof value === "object" && ("userid" in value || "baNumber" in value || "name" in value || "role" in value);
 }
 
 function flattenUsers(node, currentPath = "users") {
@@ -87,15 +41,14 @@ function flattenUsers(node, currentPath = "users") {
 
     Object.entries(node).forEach(([key, value]) => {
         const nextPath = `${currentPath}/${key}`;
+
         if (looksLikeUser(value)) {
             users.push({
                 key,
                 dbPath: nextPath,
-                userid: String(value.userid || key),
+                userid: String(value.userid || value.baNumber || key),
                 name: value.name || "Unknown User",
-                rank: value.rank || "",
                 role: value.role || "",
-                store: value.store || value.storeCode || "",
                 raw: value
             });
             return;
@@ -117,26 +70,58 @@ function normalizeStores(snapshotValue) {
     return Object.entries(snapshotValue).map(([code, value]) => ({
         code,
         name: value?.name || code,
-        description: value?.description || "No description provided.",
+        description: value?.description || `Store for ${value?.name || code}`,
+        imageDataUrl: value?.imageDataUrl || value?.image?.dataUrl || "",
+        image: value?.image || null,
+        officerRole: value?.officerRole || "",
+        storemanRole: value?.storemanRole || "",
         assignedOfficer: value?.assignedOfficer || null,
         assignedStoreman: value?.assignedStoreman || null
     })).sort((left, right) => left.name.localeCompare(right.name));
 }
 
-function getRoleLabel(role) {
-    return roleLabels[role] || role || "Unassigned";
+function normalizeRoles(snapshotValue) {
+    if (!snapshotValue || typeof snapshotValue !== "object") {
+        return [];
+    }
+
+    const roles = [];
+
+    Object.entries(snapshotValue).forEach(([category, categoryRoles]) => {
+        if (!categoryRoles || typeof categoryRoles !== "object") {
+            return;
+        }
+
+        Object.entries(categoryRoles).forEach(([key, value]) => {
+            roles.push({
+                key,
+                category,
+                name: value?.name || key
+            });
+        });
+    });
+
+    return roles.sort((left, right) => {
+        const byCategory = left.category.localeCompare(right.category);
+        if (byCategory !== 0) {
+            return byCategory;
+        }
+        return left.name.localeCompare(right.name);
+    });
 }
 
-function getRankLabel(rank) {
-    return rankLabels[rank] || rank || "-";
-}
+function toLabel(value) {
+    if (!value) {
+        return "N/A";
+    }
 
-function isOfficer(user) {
-    return officerRoles.has(user.role);
-}
-
-function isStoreman(user) {
-    return storemanRoles.has(user.role);
+    return String(value)
+        .replace(/_/g, " ")
+        .toLowerCase()
+        .split(" ")
+        .filter((part) => part.length > 0)
+        .map((part) => part.charAt(0).toUpperCase() + part.slice(1))
+        .join(" ");
 }
 
 function hideLoadingOverlay() {
@@ -147,16 +132,16 @@ function hideLoadingOverlay() {
 }
 
 function ensureAdminAccess() {
-    // const roleType = sessionStorage.getItem("role_type");
-    // const role = sessionStorage.getItem("role");
+    const roleType = sessionStorage.getItem("role_type");
+    const role = sessionStorage.getItem("role");
 
-    // if (roleType !== "admin" && role !== "admin") {
-    //     showNotification("Unauthorized access. Please sign in as admin.", "error", "Access Denied");
-    //     setTimeout(() => {
-    //         window.location.href = "index.html";
-    //     }, 800);
-    //     return false;
-    // }
+    if (roleType && roleType !== "admin" && role !== "admin") {
+        showNotification("Unauthorized access. Please sign in as admin.", "error", "Access Denied");
+        setTimeout(() => {
+            window.location.href = "index.html";
+        }, 800);
+        return false;
+    }
 
     return true;
 }
@@ -164,40 +149,15 @@ function ensureAdminAccess() {
 function updateStats() {
     const totalUsers = state.users.length;
     const totalStores = state.stores.length;
-    const totalOfficers = state.users.filter(isOfficer).length;
-    const totalStoremen = state.users.filter(isStoreman).length;
+    const totalRoles = state.roles.length;
 
-    document.getElementById("totalUsers").textContent = totalUsers;
-    document.getElementById("totalStores").textContent = totalStores;
-    document.getElementById("totalOfficers").textContent = totalOfficers;
-    document.getElementById("totalStoremen").textContent = totalStoremen;
-}
+    const totalUsersEl = document.getElementById("totalUsers");
+    const totalStoresEl = document.getElementById("totalStores");
+    const totalRolesEl = document.getElementById("totalRoles");
 
-function renderUsersTable(users) {
-    const tableBody = document.getElementById("usersTableBody");
-    if (!tableBody) {
-        return;
-    }
-
-    if (!users.length) {
-        tableBody.innerHTML = `
-            <tr>
-                <td colspan="6" style="text-align:center; color:#5d7388; padding:2rem;">No users found.</td>
-            </tr>
-        `;
-        return;
-    }
-
-    tableBody.innerHTML = users.map((user, index) => `
-        <tr>
-            <td>${index + 1}</td>
-            <td>${user.userid}</td>
-            <td>${getRankLabel(user.rank)}</td>
-            <td>${user.name}</td>
-            <td>${getRoleLabel(user.role)}</td>
-            <td>${user.store || "-"}</td>
-        </tr>
-    `).join("");
+    if (totalUsersEl) totalUsersEl.textContent = String(totalUsers);
+    if (totalStoresEl) totalStoresEl.textContent = String(totalStores);
+    if (totalRolesEl) totalRolesEl.textContent = String(totalRoles);
 }
 
 function renderStores() {
@@ -226,6 +186,7 @@ function renderStores() {
                     <div>
                         <h3>${store.name}</h3>
                         <p class="store-description">${store.description}</p>
+                        ${store.imageDataUrl ? `<img class="store-cover" src="${store.imageDataUrl}" alt="${store.name} image">` : ""}
                     </div>
                     <span class="store-code">${store.code}</span>
                 </div>
@@ -233,12 +194,12 @@ function renderStores() {
                     <div class="assignment-box">
                         <span>Officer</span>
                         <strong>${officer ? `${officer.name} (${officer.userid})` : "Not assigned"}</strong>
-                        <div class="status-pill ${officer ? "" : "unassigned"}">${officer ? getRoleLabel(officer.role) : "Pending"}</div>
+                        <div class="status-pill ${officer ? "" : "unassigned"}">${officer ? toLabel(officer.role) : (store.officerRole ? toLabel(store.officerRole) : "Pending")}</div>
                     </div>
                     <div class="assignment-box">
                         <span>Storeman</span>
                         <strong>${storeman ? `${storeman.name} (${storeman.userid})` : "Not assigned"}</strong>
-                        <div class="status-pill ${storeman ? "" : "unassigned"}">${storeman ? getRoleLabel(storeman.role) : "Pending"}</div>
+                        <div class="status-pill ${storeman ? "" : "unassigned"}">${storeman ? toLabel(storeman.role) : (store.storemanRole ? toLabel(store.storemanRole) : "Pending")}</div>
                     </div>
                 </div>
                 <div class="store-card-actions">
@@ -248,35 +209,63 @@ function renderStores() {
             </article>
         `;
     }).join("");
-
-    if (window.lucide?.createIcons) {
-        window.lucide.createIcons();
-    }
 }
 
-function filterUsers() {
-    const searchValue = document.getElementById("userSearchInput")?.value.trim().toLowerCase() || "";
+function renderRoles() {
+    const rolesList = document.getElementById("rolesList");
+    if (!rolesList) {
+        return;
+    }
 
-    state.filteredUsers = state.users.filter((user) => {
-        const haystack = [user.userid, user.name, getRankLabel(user.rank), getRoleLabel(user.role), user.store]
-            .join(" ")
-            .toLowerCase();
-        return haystack.includes(searchValue);
-    });
+    if (!state.roles.length) {
+        rolesList.innerHTML = `
+            <div class="empty-state">
+                <h3>No roles available</h3>
+                <p>Create a role to organize officer and storeman access.</p>
+            </div>
+        `;
+        return;
+    }
 
-    renderUsersTable(state.filteredUsers);
+    rolesList.innerHTML = state.roles.map((role) => `
+        <article class="role-card">
+            <div class="role-card-header">
+                <div>
+                    <h3>${role.name}</h3>
+                    <p class="role-key">${role.key}</p>
+                </div>
+                <span class="role-category ${role.category}">${toLabel(role.category)}</span>
+            </div>
+            <p class="role-description">This role is available under the ${toLabel(role.category)} category.</p>
+        </article>
+    `).join("");
 }
 
 function populateAssignUserOptions(type) {
     const select = document.getElementById("assignUser");
+    const storeCode = document.getElementById("assignStoreCode")?.value || "";
+
     if (!select) {
         return;
     }
 
-    const eligibleUsers = state.users.filter((user) => type === "officer" ? isOfficer(user) : isStoreman(user));
+    const store = state.stores.find((entry) => entry.code === storeCode);
+    const expectedRole = type === "officer" ? (store?.officerRole || "") : (store?.storemanRole || "");
+
+    let eligibleUsers = state.users.filter((user) => {
+        if (type === "officer") {
+            return ["cc", "clo", "lo", "so", "eo", "mto", "workshop", "medical", "stationary", "cimic"].includes(user.role);
+        }
+
+        return ["signco", "engrnco", "bqms", "bknco", "mtnco", "mtjco", "ammonco", "workshopnco", "medicalnco", "stationarynco", "cimicnco"].includes(user.role);
+    });
+
+    if (expectedRole) {
+        eligibleUsers = eligibleUsers.filter((user) => user.role === expectedRole);
+    }
 
     select.innerHTML = `<option value="">-- Select a user --</option>${eligibleUsers.map((user) => `
-        <option value="${user.userid}">${user.userid} - ${user.name} (${getRoleLabel(user.role)})</option>
+        <option value="${user.userid}">${user.userid} - ${user.name} (${toLabel(user.role)})</option>
     `).join("")}`;
 }
 
@@ -301,7 +290,37 @@ function closeModal(modalId) {
 }
 
 function openCreateStoreModal() {
+    const officerRoleSelect = document.getElementById("officerRole");
+    const storemanRoleSelect = document.getElementById("storemanRole");
+
+    if (officerRoleSelect && storemanRoleSelect) {
+        officerRoleSelect.innerHTML = `<option value="">-- Select an officer role --</option>${state.roles
+            .filter((role) => role.category === "officer")
+            .map((role) => `<option value="${role.key}">${role.name}</option>`)
+            .join("")}`;
+
+        storemanRoleSelect.innerHTML = `<option value="">-- Select a storeman role --</option>${state.roles
+            .filter((role) => role.category === "storeman")
+            .map((role) => `<option value="${role.key}">${role.name}</option>`)
+            .join("")}`;
+    }
+
+    const storeImage = document.getElementById("storeImage");
+    const storeImageHint = document.getElementById("storeImageHint");
+
+    if (storeImage) {
+        storeImage.value = "";
+    }
+
+    if (storeImageHint) {
+        storeImageHint.textContent = "Allowed: image files only, up to 40 KB.";
+    }
+
     openModal("createStoreModal");
+}
+
+function openCreateRoleModal() {
+    openModal("createRoleModal");
 }
 
 function openAssignModal(storeCode, type = "storeman") {
@@ -319,17 +338,80 @@ function sanitizeStoreCode(value) {
     return value.trim().toLowerCase().replace(/[^a-z0-9]+/g, "_").replace(/^_+|_+$/g, "");
 }
 
-async function createStore() {
-    const name = document.getElementById("storeName")?.value.trim() || "";
-    const rawCode = document.getElementById("storeCode")?.value.trim() || "";
-    const description = document.getElementById("storeDescription")?.value.trim() || "";
+function readFileAsDataUrl(file) {
+    return new Promise((resolve, reject) => {
+        const reader = new FileReader();
+        reader.onload = () => resolve(String(reader.result || ""));
+        reader.onerror = () => reject(new Error("Failed to read file."));
+        reader.readAsDataURL(file);
+    });
+}
 
-    if (!name || !rawCode) {
-        showNotification("Store name and code are required.", "warning", "Validation Error");
+async function createRole() {
+    const roleName = document.getElementById("roleName")?.value.trim() || "";
+    const category = document.getElementById("roleCategory")?.value || "";
+
+    if (!roleName || !category) {
+        showNotification("Role name and category are required.", "warning", "Validation Error");
         return;
     }
 
-    const storeCode = sanitizeStoreCode(rawCode);
+    const roleKey = roleName.toLowerCase().replace(/\s+/g, "_");
+    const roleRef = ref(db, `roles/${category}/${roleKey}`);
+    const existing = await get(roleRef);
+
+    if (existing.exists()) {
+        showNotification("A role with this name already exists.", "error", "Duplicate Role");
+        return;
+    }
+
+    await set(roleRef, {
+        name: roleName,
+        category
+    });
+
+    document.getElementById("roleName").value = "";
+    document.getElementById("roleCategory").value = "";
+    closeModal("createRoleModal");
+    showNotification("Role created successfully.", "success", "Role Created");
+}
+
+async function createStore() {
+    const name = document.getElementById("storeName")?.value.trim() || "";
+    const officerRole = document.getElementById("officerRole")?.value.trim() || "";
+    const storemanRole = document.getElementById("storemanRole")?.value.trim() || "";
+    const imageInput = document.getElementById("storeImage");
+    const imageFile = imageInput?.files?.[0] || null;
+
+    if (!name || !officerRole || !storemanRole) {
+        showNotification("Store name and assigned roles are required.", "warning", "Validation Error");
+        return;
+    }
+
+    let imageDataUrl = "";
+    let imageMeta = null;
+
+    if (imageFile) {
+        if (!imageFile.type.startsWith("image/")) {
+            showNotification("Only image files are allowed.", "warning", "Validation Error");
+            return;
+        }
+
+        if (imageFile.size > MAX_STORE_IMAGE_BYTES) {
+            showNotification("Image must be 40 KB or smaller.", "warning", "Validation Error");
+            return;
+        }
+
+        imageDataUrl = await readFileAsDataUrl(imageFile);
+        imageMeta = {
+            fileName: imageFile.name,
+            contentType: imageFile.type,
+            sizeBytes: imageFile.size,
+            dataUrl: imageDataUrl
+        };
+    }
+
+    const storeCode = sanitizeStoreCode(name);
     if (!storeCode) {
         showNotification("Store code must contain letters or numbers.", "warning", "Validation Error");
         return;
@@ -346,15 +428,23 @@ async function createStore() {
     await set(storeRef, {
         name,
         code: storeCode,
-        description: description || "No description provided.",
+        description: `Store for ${name}`,
+        officerRole,
+        storemanRole,
+        imageDataUrl,
+        image: imageMeta,
         assignedOfficer: null,
         assignedStoreman: null,
         createdAt: new Date().toISOString()
     });
 
     document.getElementById("storeName").value = "";
-    document.getElementById("storeCode").value = "";
-    document.getElementById("storeDescription").value = "";
+    document.getElementById("officerRole").value = "";
+    document.getElementById("storemanRole").value = "";
+    if (imageInput) {
+        imageInput.value = "";
+    }
+
     closeModal("createStoreModal");
     showNotification("Store created successfully.", "success", "Store Created");
 }
@@ -376,8 +466,8 @@ async function assignPersonnel() {
     }
 
     const storeField = assignType === "officer" ? "assignedOfficer" : "assignedStoreman";
-    const storeRef = ref(db, `stores/${storeCode}`);
-    await update(storeRef, {
+
+    await update(ref(db, `stores/${storeCode}`), {
         [storeField]: {
             userid: user.userid,
             name: user.name,
@@ -395,12 +485,7 @@ async function assignPersonnel() {
 
 function subscribeUsers() {
     onValue(ref(db, "users"), (snapshot) => {
-        const users = flattenUsers(snapshot.val())
-            .filter((user) => user.role !== "admin")
-            .sort((left, right) => left.name.localeCompare(right.name));
-
-        state.users = users;
-        filterUsers();
+        state.users = flattenUsers(snapshot.val()).sort((left, right) => left.name.localeCompare(right.name));
         updateStats();
         hideLoadingOverlay();
     }, (error) => {
@@ -419,6 +504,19 @@ function subscribeStores() {
     }, (error) => {
         console.error("Failed to load stores", error);
         showNotification("Failed to load stores from the database.", "error", "Load Error");
+        hideLoadingOverlay();
+    });
+}
+
+function subscribeRoles() {
+    onValue(ref(db, "roles"), (snapshot) => {
+        state.roles = normalizeRoles(snapshot.val());
+        renderRoles();
+        updateStats();
+        hideLoadingOverlay();
+    }, (error) => {
+        console.error("Failed to load roles", error);
+        showNotification("Failed to load roles from the database.", "error", "Load Error");
         hideLoadingOverlay();
     });
 }
@@ -442,10 +540,30 @@ function bindEvents() {
             document.querySelectorAll(".modal-overlay.open").forEach((modal) => closeModal(modal.id));
         }
     });
+
+    document.getElementById("storeImage")?.addEventListener("change", (event) => {
+        const input = event.target;
+        const file = input?.files?.[0] || null;
+        const hint = document.getElementById("storeImageHint");
+
+        if (!hint) {
+            return;
+        }
+
+        if (!file) {
+            hint.textContent = "Allowed: image files only, up to 40 KB.";
+            return;
+        }
+
+        hint.textContent = `Selected: ${file.name} (${file.size} bytes)`;
+        if (file.size > MAX_STORE_IMAGE_BYTES) {
+            hint.textContent = `Selected file is too large (${file.size} bytes). Max allowed is ${MAX_STORE_IMAGE_BYTES} bytes.`;
+        }
+    });
 }
 
-window.filterUsers = filterUsers;
 window.openCreateStoreModal = openCreateStoreModal;
+window.openCreateRoleModal = openCreateRoleModal;
 window.openAssignModal = openAssignModal;
 window.closeModal = closeModal;
 window.createStore = async () => {
@@ -464,6 +582,14 @@ window.assignPersonnel = async () => {
         showNotification("Could not assign personnel. Please try again.", "error", "Assignment Error");
     }
 };
+window.createRole = async () => {
+    try {
+        await createRole();
+    } catch (error) {
+        console.error("Failed to create role", error);
+        showNotification("Could not create the role. Please try again.", "error", "Role Error");
+    }
+};
 
 window.addEventListener("DOMContentLoaded", () => {
     if (!ensureAdminAccess()) {
@@ -473,6 +599,10 @@ window.addEventListener("DOMContentLoaded", () => {
     bindEvents();
     subscribeUsers();
     subscribeStores();
+    subscribeRoles();
+
+    const firstTab = document.querySelector(".tab-btn[data-tab='stores']");
+    firstTab?.classList.add("active");
 
     if (window.lucide?.createIcons) {
         window.lucide.createIcons();

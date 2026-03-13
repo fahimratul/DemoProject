@@ -11,7 +11,7 @@
     <div id="notification-toast" class="notification-toast"></div>
     <div class="add-user-container">
         <div class="header">
-            <h1>Officer Signup</h1>
+            <h1 id="title"></h1>
             <button class="back-button" onclick="window.history.back()">
                 <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
                     <path d="M19 12H5M12 19l-7-7 7-7"/>
@@ -25,10 +25,16 @@
                 <label for="rank">Select Rank *</label>
                 <select name="rank" id="rank" >
                     <option value="">-- Select Rank --</option>
-                    <option value="lt">Lieutenant</option>
-                    <option value="capt">Captain</option>
-                    <option value="major">Major</option>
-                    <option value="ltcol">Lieutenant Colonel</option>
+                    <option value="Sainik">Sainik</option>
+                    <option value="Lance Corporal">Lance Corporal</option>
+                    <option value="Corporal">Corporal</option>
+                    <option value="Sergent">Sergent</option>
+                    <option value="Warrant Officer">Warrant Officer</option>
+                    <option value="Master Warrant Officer">Master Warrant Officer</option>
+                    <option value="Lieutenant">Lieutenant</option>
+                    <option value="Captain">Captain</option>
+                    <option value="Major">Major</option>
+                    <option value="Lieutenant Colonel">Lieutenant Colonel</option>
                     <option value="Colonel">Colonel</option>
                     <option value="Major General">Major General</option>
                     <option value="Brigadier General">Brigadier General</option>
@@ -63,7 +69,7 @@
                     </svg>
                 </button>
             </div>
-            
+
             <div class="form-group pass">
                 <label for="confirm-password" class="form-label">Confirm Password *</label>
                 <input type="password" id="confirm-password" class="form-input" placeholder="Confirm password">
@@ -100,13 +106,37 @@
         </form>
     </div>
 
-    <script type="module" src="js/officersignup.js"></script>
+    <script type="module" src="js/signup.js"></script>
     <script>
         function togglePassword(inputId) {
             const passwordInput = document.getElementById(inputId);
             const type = passwordInput.getAttribute('type') === 'password' ? 'text' : 'password';
             passwordInput.setAttribute('type', type);
         }
+        window.addEventListener('DOMContentLoaded', () => {
+            const titleElement = document.getElementById('title');
+            const roletype=sessionStorage.getItem('role_type');
+            if (roletype ==='storeman') {
+                titleElement.textContent = 'Storeman Signup';
+            } else if (roletype ==='officer') {
+                titleElement.textContent = 'Officer Signup';
+            } 
+            else if (roletype ==='clo') {
+                titleElement.textContent = 'Cheif Logistics Officer Signup';
+            } 
+            else if (roletype ==='cc') {
+                titleElement.textContent = 'Contigent Commander Signup';
+            }
+            else if (roletype ==='admin') {
+                titleElement.textContent = 'Admin Signup';
+            }
+            else if(roletype ==='guest') {
+                titleElement.textContent = 'Guest Signup';
+            }
+            else {
+                titleElement.textContent = 'Signup';
+            }
+        });
     </script>
 </body>
 </html>

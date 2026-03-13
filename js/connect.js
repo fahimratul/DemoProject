@@ -59,31 +59,13 @@ function handlelogin() {
     }
     let dbRef;
     const role_type = sessionStorage.getItem('role_type');
-    if( role_type === 'guest') {
-    dbRef = ref(db, 'users/guest/' + userid);
-    }
-    else if (role_type === 'admin') {
-        dbRef = ref(db, 'users/admin/' + userid);
-    }
-    else if (role_type === 'storeman') {
-        dbRef = ref(db, 'users/storeman/' + userid);
-    }
-    else if (role_type === 'officer') {
-        dbRef = ref(db, 'users/officer/' + userid);
-    }
-    else if (role_type === 'cc') {
-        dbRef = ref(db, 'users/cc/' + userid);
-    }
-    else if( role_type === 'clo') {
-        dbRef = ref(db, 'users/clo/' + userid);
-    }
-    
-    get(dbRef).then((snapshot) => {
+    const dbref= ref(db, 'users/' + userid);
+    get(dbref).then((snapshot) => {
         if (snapshot.exists()) {
             const userData = snapshot.val();
             const role =userData.role;
-            const userRank = userData.rank;
-            if (userData.password === password) {
+            console.log("User data retrieved:", userData);
+            if (userData.password === password && userData.role_type === role_type) {
                 console.log("Login successful");
                 sessionStorage.setItem('userid', userid);
                 sessionStorage.setItem('role', role);
@@ -98,13 +80,13 @@ function handlelogin() {
                     localStorage.removeItem('password');
                     localStorage.removeItem('role');
                 }
-                if (role === 'admin') {
+                if (userData.role_type === 'admin') {
                     window.location.href = 'admin_dashboard.html';
                 }
-                else if (role === 'storeman') {
+                else if (userData.role_type === 'storeman') {
                     window.location.href = 'dashboard/storeman_dashboard.html';
                 }
-                else if (role === 'officer') {
+                else if (userData.role_type === 'officer') {
                     window.location.href = 'dashboard/officer_dashboard.html';
                 }
             } else {

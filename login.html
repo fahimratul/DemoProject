@@ -30,7 +30,7 @@
             <input type="checkbox" id="remember-me"><p> Remember me</p>
         </div>
         <button id="login-button">Login</button>
-        <p id="officer_signup" onclick="window.location.href='officer_signup.html'"  style="text-align: center;cursor:pointer;">Create Account</p>
+        <p id="officer_signup" onclick="window.location.href='signup.html'"  style="text-align: center;cursor:pointer;">Create Account</p>
         <br>
         <p onclick="window.location.href='index.html'" style="text-align: center;cursor:pointer">&larr; Go Back</p> 
     </div>
@@ -71,9 +71,6 @@
             }
             else if (roletype ==='guest') {
                 titleElement.textContent = 'Welcome, Guest';
-                sessionStorage.removeItem('role_type');
-                sessionStorage.setItem('role_type', 'clo');
-                document.getElementById('ba-number-label').textContent ='Army No';
                 console.log(roletype);
             }
             else {
