@@ -154,6 +154,10 @@ function setupActions() {
             window.location.href = "dashboard/storeman_dashboard.html";
             return;
         }
+        if (state.roleType === "clo" || state.roleType === "cc" || state.roleType === "guest") {
+            window.location.href = "clodashboard.html";
+            return;
+        }
 
         window.location.href = "index.html";
     });

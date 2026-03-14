@@ -167,7 +167,7 @@ function subscribeToRealtimeData() {
     const loadState = {
         users: false,
         approval: false,
-        underCommand: role === "admin" || role === "clo" || role === "cc"
+        underCommand: role === "admin" || role === "clo" || role === "cc" || role === "guest"
     };
 
     showLoading();
@@ -205,7 +205,7 @@ function subscribeToRealtimeData() {
         markLoaded("approval");
     });
 
-    if (role === "admin" || role === "clo" || role === "cc") {
+    if (role === "admin" || role === "clo" || role === "cc" || role === "guest") {
         state.underCommand = null;
         recomputeAndRender();
         return;
@@ -227,7 +227,9 @@ function subscribeToRealtimeData() {
 function canViewPending() {
     const roleType = sessionStorage.getItem("role_type");
     const role = sessionStorage.getItem("role");
-    // return roleType === "clo" || roleType === "cc" || role === "clo" || role === "cc";
+    if(roleType === "guest"){
+        return false;
+    }
     return true;
 }
 
@@ -235,15 +237,7 @@ function ensureAccess() {
     const userid = sessionStorage.getItem("userid");
     const roleType = sessionStorage.getItem("role_type");
 
-    if (!userid || !roleType) {
-        showNotification("Session expired. Please log in again.", "error", "Unauthorized");
-        setTimeout(() => {
-            window.location.href = "index.html";
-        }, 600);
-        return false;
-    }
-
-    if (!["officer", "clo", "cc", "admin"].includes(roleType)) {
+    if (!["officer", "clo", "cc", "admin", "guest"].includes(roleType)) {
         showNotification("Unauthorized access.", "error", "Unauthorized");
         setTimeout(() => {
             window.location.href = "index.html";
@@ -436,9 +430,9 @@ function bindEvents() {
 }
 
 window.addEventListener("DOMContentLoaded", async () => {
-    // if (!ensureAccess()) {
-    //     return;
-    // }
+    if (!ensureAccess()) {
+        return;
+    }
 
     bindEvents();
     subscribeToRealtimeData();

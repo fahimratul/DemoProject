@@ -31,7 +31,7 @@ window.addEventListener('DOMContentLoaded', () => {
         window.location.href = 'index.html';
         return;
     }
-    if( role_type !== 'officer' && role_type !== 'clo' && role_type !== 'cc'){ 
+    if( role_type !== 'officer' && role_type !== 'clo' && role_type !== 'cc' && role_type !== 'guest' ) { 
         console.error('Unauthorized role type:', role_type);
         alert('Unauthorized access. Please log in with the correct credentials.');
         window.location.href = 'index.html';

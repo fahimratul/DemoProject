@@ -122,7 +122,7 @@ async function handlelogin() {
                 else if (userData.role_type === 'officer') {
                     window.location.href = 'officer_homepage.html';
                 }
-                else if (userData.role_type === 'clo' || userData.role_type === 'cc') {
+                else if (userData.role_type === 'clo' || userData.role_type === 'cc' || userData.role_type === 'guest') {
                     window.location.href = 'clodashboard.html';
                 }
             } else {
