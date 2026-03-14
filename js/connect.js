@@ -47,7 +47,28 @@ document.getElementById('password').addEventListener('keypress', function(event)
     }
 });
 
-function handlelogin() {
+async function findStoreByStoremanRole(roleKey) {
+    const storesSnapshot = await get(ref(db, 'stores'));
+
+    if (!storesSnapshot.exists()) {
+        return null;
+    }
+
+    const stores = storesSnapshot.val();
+
+    for (const [storeKey, storeData] of Object.entries(stores)) {
+        if (storeData?.storemanRole === roleKey) {
+            return {
+                code: storeData?.code || storeKey,
+                name: storeData?.name || storeKey
+            };
+        }
+    }
+
+    return null;
+}
+
+async function handlelogin() {
     console.log("Login button clicked");
     const userid = document.getElementById('ba-number').value;
     const password = document.getElementById('password').value;
@@ -60,7 +81,7 @@ function handlelogin() {
     let dbRef;
     const role_type = sessionStorage.getItem('role_type');
     const dbref= ref(db, 'users/' + userid);
-    get(dbref).then((snapshot) => {
+    get(dbref).then(async (snapshot) => {
         if (snapshot.exists()) {
             const userData = snapshot.val();
             const role =userData.role;
@@ -84,7 +105,19 @@ function handlelogin() {
                     window.location.href = 'admin_dashboard.html';
                 }
                 else if (userData.role_type === 'storeman') {
+                    const assignedStore = await findStoreByStoremanRole(role);
+
+                    if (!assignedStore) {
+                        sessionStorage.removeItem('selected_store_code');
+                        sessionStorage.removeItem('selected_store_name');
+                        showNotification('No assigned store found for this storeman role.', 'error', 'Store Not Found');
+                        return;
+                    }
+
+                    sessionStorage.setItem('selected_store_code', assignedStore.code);
+                    sessionStorage.setItem('selected_store_name', assignedStore.name);
                     window.location.href = 'dashboard/storeman_dashboard.html';
+                    
                 }
                 else if (userData.role_type === 'officer') {
                     window.location.href = 'officer_homepage.html';

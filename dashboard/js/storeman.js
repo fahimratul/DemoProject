@@ -22,6 +22,11 @@ const db = getDatabase(app);
 console.log(db);
 console.log("Firebase Initialized");
 
+const role = sessionStorage.getItem('role');
+const store = sessionStorage.getItem('selected_store_code');
+const role_type = sessionStorage.getItem('role_type');
+const selectedStoreName = sessionStorage.getItem('selected_store_name');
+
 window.addEventListener('DOMContentLoaded', () => {
     let userid = sessionStorage.getItem('userid');
     let role_type = sessionStorage.getItem('role_type');
@@ -40,39 +45,9 @@ window.addEventListener('DOMContentLoaded', () => {
     console.log('Logged in as BA Number:', userid);    
     initializePDFButtons();
     initializeIssueButton();
+    document.getElementById('title').textContent = `${selectedStoreName} Inventory Management`;
 });
 
-let ranklist ={
-    snk:"Sainik",
-    lcpl:"Lance Corporal",
-    cpl:"Corporal",
-    sgt:"Sergeant",
-    wo:"Warrant Officer",
-    swo:"Senior Warrant Officer",
-    mwo:"Master Warrant Officer",
-    lt:"Lieutenant",
-    capt:"Captain",
-    major:"Major",
-    ltcol:"Lieutenant Colonel",
-    col:"Colonel",
-    brig:"Brigadier",
-    majorgen:"Major General",
-    ltgen:"Lieutenant General",
-    gen:"General"
-};
-
-const role = sessionStorage.getItem('role');
-
-
-window.addEventListener('DOMContentLoaded', () => {
-    const username=sessionStorage.getItem('username');
-    const rank=sessionStorage.getItem('rank');
-    const userid=sessionStorage.getItem('userid');
-    document.getElementById('username').textContent='Name: ' + username;
-    document.getElementById('rank').textContent=ranklist[rank] ? 'Rank: ' + ranklist[rank] : 'Rank: ' + rank;
-    sessionStorage.setItem('rank_proper', ranklist[rank] ? ranklist[rank] : rank);
-    document.getElementById('userid').textContent='Army No: ' + userid;
-});
 
 
 import {showNotification} from '../../js/notification.js';
@@ -95,7 +70,7 @@ const inputs = {
 
 function loaditemdata() {
      
-    let dbRef =ref(db, 'bkncoinventory/main/');
+    let dbRef =ref(db, `${store}/main/`);
 
     const loadingOverlay = document.getElementById('loadingOverlay');
 
@@ -293,11 +268,11 @@ function updateFilterButtonStates() {
     if (issueBtn) {
         if (activeFilters.showWithIssues) {
             issueBtn.classList.add('active');
-            issueBtn.style.backgroundColor = '#4CAF50';
+            issueBtn.style.background = '#4CAF50';
             issueBtn.style.color = 'white';
         } else {
             issueBtn.classList.remove('active');
-            issueBtn.style.backgroundColor = '';
+            issueBtn.style.background = '';
             issueBtn.style.color = '';
         }
     }
@@ -305,11 +280,11 @@ function updateFilterButtonStates() {
     if (unserviceableBtn) {
         if (activeFilters.showWithUnserviceable) {
             unserviceableBtn.classList.add('active');
-            unserviceableBtn.style.backgroundColor = '#f44336';
+            unserviceableBtn.style.background = '#f44336';
             unserviceableBtn.style.color = 'white';
         } else {
             unserviceableBtn.classList.remove('active');
-            unserviceableBtn.style.backgroundColor = '';
+            unserviceableBtn.style.background = '';
             unserviceableBtn.style.color = '';
         }
     }
@@ -444,7 +419,7 @@ editForm?.addEventListener('submit', (e) => {
     };
 
     console.table({ key: currentEditKey, updated });
-    const dbRef = ref(db, 'officerapproval/newtotal/bkncoinventory/' + currentEditKey);
+    const dbRef = ref(db, `officerapproval/newtotal/${store}/` + currentEditKey);
     set(dbRef, updated).then(() => {
         showNotification('Item update request submitted for approval.', 'info', 'Update Requested');
         loaditemdata();
@@ -469,53 +444,6 @@ logoutButton?.addEventListener('click', () => {
     sessionStorage.removeItem('rank');
     window.location.href = './../index.html';
 });
-
-function changePassword() {
-    const userid = sessionStorage.getItem('userid');
-    if (!userid) {
-        console.error('BA Number not found in session storage.');
-        window.location.href = 'index.html';return;
-    }
-    const currentPassword = document.getElementById('password').value;
-    const newPassword = document.getElementById('new-password').value;    
-    const confirmPassword = document.getElementById('confirm-password').value;
-    if (newPassword !== confirmPassword) {
-        showNotification("New passwords do not match", "error", "Validation Error");
-        return;
-    }
-    if (newPassword.length < 6) {
-        showNotification("New password must be at least 6 characters long", "error", "Validation Error");
-        return;
-    }
-    const userRef = ref(db, 'users/' + userid);
-    get(userRef).then((snapshot) => {
-        const userData = snapshot.val();
-        if (userData) {
-            if (userData.password !== currentPassword) {
-                showNotification("Current password is incorrect", "error", "Validation Error");
-                return;
-            }
-            update(userRef, { password: newPassword })
-                .then(() => {
-                    showNotification("Password changed successfully", "success", "Success");
-                    sessionStorage.clear();
-                    window.location.href = '../index.html';
-                })
-                .catch((error) => {
-                    console.error("Error updating password:", error);
-                    showNotification("Error updating password", "error", "Update Failed");
-                });
-        } else {
-            showNotification("User data not found", "error", "Error");
-        }
-    }).catch((error) => {
-        console.error("Error fetching user data:", error);
-        showNotification("Error fetching user data", "error", "Error");
-    });
-}
-
-document.getElementById('passwordChangeSubmitBtn')?.addEventListener('click', changePassword);
-
 
 let isSelectionMode = false;
 

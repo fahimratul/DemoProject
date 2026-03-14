@@ -438,8 +438,8 @@ function approveNewItem(key) {
         console.error('Error approving new item:', error);
     });
     set(ref(db, 'clo_cc_notification/' + Date.now()), {
-        from: 'BK NCO Inventory',
-        msg: `New BK NCO Inventory item "${newItem.name || ''}" has been added by ${sessionStorage.getItem('username')} (BA Number: ${sessionStorage.getItem('userid')}).`,
+        from: selectedStoreName,
+        msg: `New ${selectedStoreName} Inventory item "${newItem.name || ''}" has been added by ${sessionStorage.getItem('username')} (BA Number: ${sessionStorage.getItem('userid')}).`,
         date: new Date().toLocaleString()
     }).then(() => {
         console.log('CLO/CC notified successfully about the new item.');
@@ -462,28 +462,30 @@ function rejectNewItem(key) {
 
 function newPendingItemNotification(){
     const fixedNotification = document.getElementById('fixednotification');
-    fixedNotification.style.display = 'flex';
+    
 
     onValue(ref(db, `issuepending/${store}/`), (snapshot) => {
         if(snapshot.exists()){
+            fixedNotification.style.display = 'flex';
             let html = fixedNotification.innerHTML;
             const id = Date.now();
             html += `<div class="notification-content" id="pending_${id}">
-            <p id="notificationMessage"> You have a new <strong> Pending Issue item </strong>  From BK NCO.</p>
+            <p id="notificationMessage"> You have a new <strong> Pending Issue item </strong>  From ${selectedStoreName}.</p>
             <button class="notification-close" onclick="hidefixedNotification('pending_${id}')" aria-label="Close">&times;</button>
             <button class="notification-view" id="viewPendingBtn" onclick="window.location.href='pendingIssue.html'">View</button>
         </div>`
         fixedNotification.innerHTML = html;
         }
     });
-    onValue(ref(db, `issuepending/${store}/`), (snapshot) => {
+    onValue(ref(db, `unservicable_storeman/${store}/`), (snapshot) => {
         if(snapshot.exists()){
+            fixedNotification.style.display = 'flex';
             let html = fixedNotification.innerHTML;
             const id = Date.now();
             html += `<div class="notification-content" id="pending_${id}">
-            <p id="notificationMessage"> You have a new <strong> Pending Issue item </strong>  to issue From Engr Inventory.</p>
+            <p id="notificationMessage"> You have a new <strong> Pending Unserviceable Item </strong>  to issue From ${selectedStoreName}.</p>
             <button class="notification-close" onclick="hidefixedNotification('pending_${id}')" aria-label="Close">&times;</button>
-            <button class="notification-view" id="viewPendingBtn" onclick="window.location.href='./../engr/pendingIssue.html'">View</button>
+            <button class="notification-view" id="viewPendingBtn" onclick="window.location.href='pendingunsvc.html'">View</button>
         </div>`
         fixedNotification.innerHTML = html;
         }
@@ -495,6 +497,7 @@ function loadreturnnotification(){
     onValue(ref(db, `notification/${store}/`), (snapshot) => {
         const notificationData = snapshot.val();
         if(notificationData){
+            returnnotification.style.display = 'flex';
             let html = '';
             for(const key in notificationData){
                 const notification = notificationData[key];
@@ -519,6 +522,11 @@ function acknowledgeNotification(key){
     }).catch((error) => {
         console.error('Error acknowledging notification:', error);
     });
+    
+    const returnnotification = document.getElementById('returnnotification');
+    if(returnnotification.children.length === 0){
+        returnnotification.style.display = 'none';
+    }
 }
 
 window.acknowledgeNotification = acknowledgeNotification;

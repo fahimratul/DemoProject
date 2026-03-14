@@ -2,27 +2,34 @@ import { initializeApp } from "https://www.gstatic.com/firebasejs/12.7.0/firebas
 import { getDatabase, get, ref, set, push, update, remove, onValue } from "https://www.gstatic.com/firebasejs/12.7.0/firebase-database.js";
 import { showNotification } from '../../js/notification.js';
 
-const firebaseConfig = {
-    apiKey: "AIzaSyCIX-3-GunSudlllY-dFRo943ysFXtBiOk",
-    authDomain: "bdarmystoremgt.firebaseapp.com",
-    databaseURL: "https://bdarmystoremgt-default-rtdb.firebaseio.com",
-    projectId: "bdarmystoremgt",
-    storageBucket: "bdarmystoremgt.firebasestorage.app",
-    messagingSenderId: "960978586847",
-    appId: "1:960978586847:web:afcee2217a1c3c876ead6a",
-    measurementId: "G-H27M1SNMPX"
-};
+  const firebaseConfig = {
+    apiKey: "AIzaSyBUis8E99I4feTN2D2Opivn1rwyZe7DmPU",
+    authDomain: "fir-3842a.firebaseapp.com",
+    databaseURL: "https://fir-3842a-default-rtdb.asia-southeast1.firebasedatabase.app",
+    projectId: "fir-3842a",
+    storageBucket: "fir-3842a.firebasestorage.app",
+    messagingSenderId: "904490469367",
+    appId: "1:904490469367:web:53595ab4b9d2a1c65810f2",
+    measurementId: "G-EEZ0XX89X5"
+  };
+
 
 // Initialize Firebase
 const app = initializeApp(firebaseConfig);
 const db = getDatabase(app);
 
 
+
+const role = sessionStorage.getItem('role');
+const store = sessionStorage.getItem('selected_store_code');
+const role_type = sessionStorage.getItem('role_type');
+const selectedStoreName = sessionStorage.getItem('selected_store_name');
+
+
+
 window.addEventListener('DOMContentLoaded', () => {
     // Check authentication
     const userid = sessionStorage.getItem('userid');
-    const role_type = sessionStorage.getItem('role_type');
-    
     if (!role_type || !userid) {
         alert('Session expired. Please log in again.');
         window.location.href = 'index.html';
@@ -43,7 +50,7 @@ let pendingItemsDataCaches={};
 function pendingitems(){
     const loadingOverlay = document.getElementById('loadingOverlay');
     const pendingitemsContainer = document.getElementById('pendingsection');
-    const dbRef = ref(db, 'unservicable_storeman/bknco/');
+    const dbRef = ref(db, `unservicable_storeman/${store}/`);
     let html='';
     get(dbRef).then((snapshot) => {
         pendingItemsDataCaches = snapshot.val() || {};
@@ -169,14 +176,14 @@ function removeItemRow(rowId, sectionId, parentSectionId, itemID) {
     }
     console.log('Removed item with ID:', itemID);
 
-    remove(ref(db, `unservicable_storeman/bknco/${parentSectionId}/items/${itemID}`));
+    remove(ref(db, `unservicable_storeman/${store}/${parentSectionId}/items/${itemID}`));
     
     const itemsContainer = document.getElementById(sectionId);
     if (itemsContainer.children.length === 0) {
         const pendingitemsContainer = document.getElementById(parentSectionId);
         pendingitemsContainer.remove();
         const key = parentSectionId;
-        remove(ref(db, `unservicable_storeman/bknco/${key}`));
+        remove(ref(db, `unservicable_storeman/${store}/${key}`));
         showNotification('All items removed. Pending request is deleted automatically.', 'info', 'Request Deleted Automatically');
     }
 }
@@ -210,7 +217,7 @@ function processIssueRequest(key) {
             showNotification('Please specify valid quantities for all items.', 'error', 'Validation Failed');
             return;
         }
-        const mainitem = get(ref(db, `engrinventory/main/${itemkey}`));
+        const mainitem = get(ref(db, `${store}/main/${itemkey}`));
         mainitem.then((snapshot) => {
             const itemData = snapshot.val();
             const availableQty = (itemData.instore || 0) - (itemData.unservicable || 0);
@@ -220,19 +227,19 @@ function processIssueRequest(key) {
             }
             console.log(`Issuing ${quantity} of item ${itemData.name}`);
             msgforclo+=`${quantity} X ${itemData.name} for ${reason} ,; `;
-            set(ref(db, `bkncoinventory/${itemkey}/unsvc/${voucherNumber}`), {
+            set(ref(db, `${store}/${itemkey}/unsvc/${voucherNumber}`), {
                 date: issueDate,
                 quantity: quantity,
                 reason: reason,
-
             });
-            update(ref(db, `bkncoinventory/main/${itemkey}`), {
+
+            update(ref(db, `${store}/main/${itemkey}`), {
                 unservicable: (itemData.unservicable || 0) + quantity,
                 servicable: (itemData.servicable || 0) - quantity
             });
         });
     }
-    remove(ref(db, `unservicable_storeman/bknco/${key}`))
+    remove(ref(db, `unservicable_storeman/${store}/${key}`))
     .then(() => {
         console.log('Pending issue request removed from database.');
     })
@@ -242,7 +249,7 @@ function processIssueRequest(key) {
     const issueRef = push(ref(db, 'clo_cc_notification/'));
     set(issueRef, {
         msg: msgforclo,
-        from: 'BK NCO Inventory',
+        from: selectedStoreName,
         time: formatDate(new Date())   
     }).then(() => {
         showNotification('Items marked as unserviceable successfully! Opening print dialog...', 'success', 'Request Submitted');
@@ -259,7 +266,7 @@ function processIssueRequest(key) {
 }
 
 function rejectIssueRequest(key) {
-    remove(ref(db, `unservicable_storeman/bknco/${key}`))
+    remove(ref(db, `unservicable_storeman/${store}/${key}`))
     .then(() => {
         showNotification('Issue request rejected successfully.', 'success', 'Request Rejected');
         // Remove the corresponding pending item section from the DOM

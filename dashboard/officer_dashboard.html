@@ -386,6 +386,9 @@
         function hidefixedNotification(notificationId){
             const fixedNotification = document.getElementById(notificationId);
             fixedNotification.style.display = 'none';
+            if(fixedNotification.parentElement.children.length === 1){
+                fixedNotification.parentElement.style.display = 'none';
+            }
         }
         
         function additem(){

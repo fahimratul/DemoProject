@@ -2,16 +2,22 @@ import { initializeApp } from "https://www.gstatic.com/firebasejs/12.7.0/firebas
 import { getDatabase, get, ref, set, push, update, remove, onValue } from "https://www.gstatic.com/firebasejs/12.7.0/firebase-database.js";
 import { showNotification } from '../../js/notification.js';
 
-const firebaseConfig = {
-    apiKey: "AIzaSyCIX-3-GunSudlllY-dFRo943ysFXtBiOk",
-    authDomain: "bdarmystoremgt.firebaseapp.com",
-    databaseURL: "https://bdarmystoremgt-default-rtdb.firebaseio.com",
-    projectId: "bdarmystoremgt",
-    storageBucket: "bdarmystoremgt.firebasestorage.app",
-    messagingSenderId: "960978586847",
-    appId: "1:960978586847:web:afcee2217a1c3c876ead6a",
-    measurementId: "G-H27M1SNMPX"
-};
+  const firebaseConfig = {
+    apiKey: "AIzaSyBUis8E99I4feTN2D2Opivn1rwyZe7DmPU",
+    authDomain: "fir-3842a.firebaseapp.com",
+    databaseURL: "https://fir-3842a-default-rtdb.asia-southeast1.firebasedatabase.app",
+    projectId: "fir-3842a",
+    storageBucket: "fir-3842a.firebasestorage.app",
+    messagingSenderId: "904490469367",
+    appId: "1:904490469367:web:53595ab4b9d2a1c65810f2",
+    measurementId: "G-EEZ0XX89X5"
+  };
+
+
+const role = sessionStorage.getItem('role');
+const store = sessionStorage.getItem('selected_store_code');
+const role_type = sessionStorage.getItem('role_type');
+const selectedStoreName = sessionStorage.getItem('selected_store_name');
 
 // Initialize Firebase
 const app = initializeApp(firebaseConfig);
@@ -23,7 +29,6 @@ let itemCounter = 0;
 window.addEventListener('DOMContentLoaded', () => {
     // Check authentication
     const userid = sessionStorage.getItem('userid');
-    const role_type = sessionStorage.getItem('role_type');
     
     if (!role_type || !userid) {
         alert('Session expired. Please log in again.');
@@ -34,7 +39,6 @@ window.addEventListener('DOMContentLoaded', () => {
     console.log('Logged in as BA Number:', userid);
     // Initialize the pa
     pendingitems();
-
     setTimeout(initializeEventListeners, 2000);
 });
 
@@ -46,7 +50,7 @@ function pendingitems(){
     const loadingOverlay = document.getElementById('loadingOverlay');
     itemCounter++;
     const pendingitemsContainer = document.getElementById('pendingsection');
-    const dbRef = ref(db, 'issuepending/bknco/');
+    const dbRef = ref(db, `issuepending/${store}/`);
     let html='';
     get(dbRef).then((snapshot) => {
         pendingItemsDataCaches = snapshot.val() || {};
@@ -170,14 +174,14 @@ function removeItemRow(rowId, sectionId, parentSectionId, itemID) {
     }
     console.log('Removed item with ID:', itemID);
 
-    remove(ref(db, `issuepending/bknco/${parentSectionId}/items/${itemID}`));
+    remove(ref(db, `issuepending/${store}/${parentSectionId}/items/${itemID}`));
     
     const itemsContainer = document.getElementById(sectionId);
     if (itemsContainer.children.length === 0) {
         const pendingitemsContainer = document.getElementById(parentSectionId);
         pendingitemsContainer.remove();
         const key = parentSectionId;
-        remove(ref(db, `issuepending/bknco/${key}`));
+        remove(ref(db, `issuepending/${store}/${key}`));
         showNotification('All items removed. Pending request is deleted automatically.', 'info', 'Request Deleted Automatically');
     }
 }
@@ -212,7 +216,7 @@ function processIssueRequest(key) {
             showNotification('Please specify valid quantities for all items.', 'error', 'Validation Failed');
             return;
         }
-        const mainitem = get(ref(db, `bkncoinventory/main/${itemkey}`));
+        const mainitem = get(ref(db, `${store}/main/${itemkey}`));
         mainitem.then((snapshot) => {
             const itemData = snapshot.val();
             const availableQty = (itemData.servicable || 0) - (itemData.issue || 0);
@@ -222,12 +226,12 @@ function processIssueRequest(key) {
             }
             console.log(`Issuing ${quantity} of item ${itemData.name}`);
             msg= msg + quantity+ 'X' + itemData.name + ', ';
-            set(ref(db, `bkncoinventory/${itemkey}/history/${voucherNumber}`), {
+            set(ref(db, `${store}/${itemkey}/history/${voucherNumber}`), {
                 date: issueDate,
                 location: recipientLocation,
                 quantity: quantity
             });
-            update(ref(db, `bkncoinventory/main/${itemkey}`), {
+            update(ref(db, `${store}/main/${itemkey}`), {
                 issue: (itemData.issue || 0) + quantity,
                 instore: (itemData.instore || 0) - quantity
             });
@@ -235,7 +239,7 @@ function processIssueRequest(key) {
     }
 
     printIssueRequest(pendingItemsDataCaches[key], Object.values(pendingItemsDataCaches[key].items), voucherNumber, issueDate, recipientLocation, pendingItemsDataCaches[key].issuedBy);
-    remove(ref(db, `issuepending/bknco/${key}`))
+    remove(ref(db, `issuepending/${store}/${key}`))
     .then(() => {
         console.log('Pending issue request removed from database.');
     })
@@ -245,7 +249,7 @@ function processIssueRequest(key) {
     const issueRef = push(ref(db, 'clo_cc_notification/'));
     set(issueRef, {
         msg: msg,
-        from: 'BK NCO Inventory',
+        from: selectedStoreName,
         time: new Date().toLocaleString()   
     }).then(() => {
         showNotification('Items issued successfully! Opening print dialog...', 'success', 'Request Submitted');
@@ -260,7 +264,7 @@ function processIssueRequest(key) {
 }
 
 function rejectIssueRequest(key) {
-    remove(ref(db, `issuepending/bknco/${key}`))
+    remove(ref(db, `issuepending/${store}/${key}`))
     .then(() => {
         showNotification('Issue request rejected successfully.', 'success', 'Request Rejected');
         // Remove the corresponding pending item section from the DOM
@@ -517,7 +521,7 @@ function printIssueRequest(issueRequest, itemsToIssue, voucherNo, issueDate, loc
                 <p>In lieu of BAFZ 2096</p>
             </div>
             <div class="header">
-                <h1>BANRDB Store Management System</h1>
+                <h1>${selectedStoreName}</h1>
                 <h2>Issue Request Form</h2>
                 <p>Generated on ${currentDate}</p>
             </div>
@@ -572,7 +576,7 @@ function printIssueRequest(issueRequest, itemsToIssue, voucherNo, issueDate, loc
                     <div class="signature-field">
                         <p class="signature-label">Approved By:</p>
                         <p class="signature-username"><strong>${sessionStorage.getItem('username')}</strong></p>
-                        <p  class="signature-username">${sessionStorage.getItem('rank_proper')}</p>
+                        <p  class="signature-username">${sessionStorage.getItem('rank')}</p>
                         <p class="signature-username">BA No-${sessionStorage.getItem('userid')}</p>
                         <div class="signature-line2"></div>
                         <p class="signature-note">Signature & Date</p>
@@ -589,7 +593,7 @@ function printIssueRequest(issueRequest, itemsToIssue, voucherNo, issueDate, loc
             </div>
             
             <div class="footer">
-                <p class="system-name">BANRDB Store Management System</p>
+                <p class="system-name">${selectedStoreName}</p>
                 <p>This document was generated automatically on ${currentDate}</p>
                 <p class="retention-note">Please retain this copy for your records</p>
             </div>

@@ -2,16 +2,19 @@ import { initializeApp } from "https://www.gstatic.com/firebasejs/12.7.0/firebas
 import { getDatabase, get, ref, set, push, update, remove, onValue } from "https://www.gstatic.com/firebasejs/12.7.0/firebase-database.js";
 import { showNotification } from '../../js/notification.js';
 
+
 const firebaseConfig = {
-    apiKey: "AIzaSyCIX-3-GunSudlllY-dFRo943ysFXtBiOk",
-    authDomain: "bdarmystoremgt.firebaseapp.com",
-    databaseURL: "https://bdarmystoremgt-default-rtdb.firebaseio.com",
-    projectId: "bdarmystoremgt",
-    storageBucket: "bdarmystoremgt.firebasestorage.app",
-    messagingSenderId: "960978586847",
-    appId: "1:960978586847:web:afcee2217a1c3c876ead6a",
-    measurementId: "G-H27M1SNMPX"
-};
+    apiKey: "AIzaSyBUis8E99I4feTN2D2Opivn1rwyZe7DmPU",
+    authDomain: "fir-3842a.firebaseapp.com",
+    databaseURL: "https://fir-3842a-default-rtdb.asia-southeast1.firebasedatabase.app",
+    projectId: "fir-3842a",
+    storageBucket: "fir-3842a.firebasestorage.app",
+    messagingSenderId: "904490469367",
+    appId: "1:904490469367:web:53595ab4b9d2a1c65810f2",
+    measurementId: "G-EEZ0XX89X5"
+  };
+
+
 
 // Initialize Firebase
 const app = initializeApp(firebaseConfig);
@@ -21,6 +24,14 @@ const db = getDatabase(app);
 let pendingIssuesData = {};
 let unserviceableData = {};
 let pendingChangesData = {};
+
+
+
+const role = sessionStorage.getItem('role');
+const store = sessionStorage.getItem('selected_store_code');
+const role_type = sessionStorage.getItem('role_type');
+const selectedStoreName = sessionStorage.getItem('selected_store_name');
+
 
 window.addEventListener('DOMContentLoaded', () => {
     // Check authentication
@@ -40,23 +51,7 @@ window.addEventListener('DOMContentLoaded', () => {
     pendingnewitemdata();
     pendingnewtotalitemdata();
 });
-let ranklist ={
-    snk:"Sainik",
-    lcpl:"Lance Corporal",
-    cpl:"Corporal",
-    sgt:"Sergeant",
-    wo:"Warrant Officer",
-    swo:"Senior Warrant Officer",
-    mwo:"Master Warrant Officer",
-};
-window.addEventListener('DOMContentLoaded', () => {
-    const username=sessionStorage.getItem('username');
-    const rank=sessionStorage.getItem('rank');
-    const userid=sessionStorage.getItem('userid');
-    document.getElementById('username').textContent='Name: ' + username;
-    document.getElementById('rank').textContent=ranklist[rank] ? 'Rank: ' + ranklist[rank] : 'Rank: ' + rank;
-    document.getElementById('userid').textContent='Army No: ' + userid;
-});
+
 // Make this function globally available
 window.loadAllPendingData = loadAllPendingData;
 
@@ -82,7 +77,7 @@ async function loadAllPendingData() {
 
 async function loadPendingIssues() {
     try {
-        const dbRef = ref(db, 'issuepending/bknco/');
+        const dbRef = ref(db, `issuepending/${store}/`);
         const snapshot = await get(dbRef);
         pendingIssuesData = snapshot.val() || {};
         console.log('Pending Issues loaded:', pendingIssuesData);
@@ -95,7 +90,7 @@ async function loadPendingIssues() {
 
 async function loadUnserviceableItems() {
     try {
-        const dbRef = ref(db, 'unservicable_storeman/bknco/');
+        const dbRef = ref(db, `unservicable_storeman/${store}/`);
         const snapshot = await get(dbRef);
         unserviceableData = snapshot.val() || {};
         console.log('Unserviceable items loaded:', unserviceableData);
@@ -107,7 +102,7 @@ async function loadUnserviceableItems() {
 }
 let dataCache = {};
 function loadtotalitemdata() {
-    let dbref =ref(db, 'bkncoinventory/main/');
+    let dbref =ref(db, `${store}/main/`);
     onValue(dbref, (snapshot) => {
         const data = snapshot.val();
         if (data) {
@@ -120,7 +115,7 @@ function loadtotalitemdata() {
 
 
 function pendingnewitemdata() {
-    let dbRef =ref(db, 'officerapproval/new/bkncoinventory/');
+    let dbRef =ref(db, `officerapproval/new/${store}/`);
     const newpendingitembody = document.getElementById('newpendingitem');
     const newitemTableBody = document.getElementById('newitemTableBody');
     onValue(dbRef, (snapshot) => {
@@ -161,7 +156,7 @@ function pendingnewitemdata() {
 } 
 
 function pendingnewtotalitemdata() {
-    let dbRef =ref(db, 'officerapproval/newtotal/bkncoinventory/');
+    let dbRef =ref(db, `officerapproval/newtotal/${store}/`);
     const newpendingtotalitem = document.getElementById('newpendingtotalitem');
     const newitemtotalTableBody = document.getElementById('newitemtotalTableBody');
 
@@ -321,7 +316,7 @@ window.viewPendingRequest = function(requestId) {
 
 window.rejectRequest = function(requestId) {
     if (confirm('Are you sure you want to reject this request?')) {
-        const dbRef = ref(db, 'issuepending/bknco/' + requestId);
+        const dbRef = ref(db, `issuepending/${store}/` + requestId);
         remove(dbRef)
             .then(() => {
                 showNotification('Request rejected successfully.', 'success');
@@ -341,7 +336,7 @@ window.viewUnserviceableItem = function(itemId) {
 
 window.markAsDisposed = function(itemId) {
     if (confirm('Are you sure you want to cancel this unserviceable item request?')) {
-        const dbRef = ref(db, 'unservicable_storeman/bknco/' + itemId);
+        const dbRef = ref(db, `unservicable_storeman/${store}/` + itemId);
         remove(dbRef)
             .then(() => {
                 showNotification('Unserviceable item request cancelled successfully.', 'success');  
